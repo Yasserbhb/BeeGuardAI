@@ -1,6 +1,6 @@
 Here is the link to our Edge Impulse Public project, where we imported the dataset, started labeling, and ran several model tests to detect hornets and bees. 
 We currently use three classes: hornets, bees (group) when multiple bees appear together, and bee (single) when only one bee is visible. 
-So far, we have labeled around 200 images, and we tested different model architectures. The most promising results come from a FOMO-based model, which reaches an F1-score of 58.3% on the training set. 
+So far, we have labeled around 200 images, and we tested different model architectures. The most promising results come from a YOLO-based model, which reaches a precision score of 70 % on the training set and 37,32 % accuracy on the test set. 
 
 https://studio.edgeimpulse.com/public/798417/live
 
