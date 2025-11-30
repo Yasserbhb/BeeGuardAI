@@ -13,7 +13,7 @@ The full list of contributors below
 - Ghozlene Hanafi
 - Yanelle Bekkar
 - Hadriel Ratiarison
-- Amine Ahmed
+- Amine Nait Si Ahmed 
 
 The idea is simple:
 A low-cost embedded device placed on top of a hive monitors the flight area with a small camera. Using Edge Impulse tools, we collected and labeled videos, experimented with AI-assisted annotation, trained recognition models, and deployed them on embedded hardware. The system counts hornets, alerts beekeepers, estimates threat levels, and provides actionable data—whether to move hives, destroy nearby nests, or reinforce protection.
