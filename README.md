@@ -2,6 +2,9 @@
 
 Since its accidental introduction in France around 2004, the yellow-legged hornet (Vespa velutina nigrithorax) has spread explosively across Europe. With no natural predators, this invasive species has become a major threat to biodiversity. It preys on pollinators—especially honeybees—and has developed a remarkably effective hunting strategy: hovering in front of hives, ambushing bees as they leave, and frightening the entire colony into staying inside. This pressure occurs at the end of summer and in autumn, the critical period when bees must build their winter reserves. As a result, thousands of colonies collapse each year, and many do not survive winter.
 
+<img width="1080" height="1920" alt="frame3_0005" src="https://github.com/user-attachments/assets/a5a17c41-6247-42d9-9fc0-83794106743d" />
+
+
 At the moment, beekeepers have no reliable, scalable solution. The hornet population keeps growing, endangering bees, other pollinators, ecosystems, and even humans—its nests are difficult to spot, and accidental encounters have already caused fatal attacks.
 
 At Sorbonne University and Polytech Sorbonne, we have been working for several years on hive-monitoring projects with embedded systems and IoT technologies. This year, as part of a new initiative launched alongside the Edge Impulse hackathon, we created BeeGuardAI to focus specifically on the yellow-legged hornet: detecting it, counting it, and alerting beekeepers in real time. The project was started jointly by a group of Sorbonne University students and their supervising instructor, Yann Douze (professor of Embedded Systems, IoT, Processor Architecture, and Chip Design), together with a team of motivated participants. The hackathon provided the ideal framework to kick-start this new effort, experiment rapidly, and build the first AI-powered prototypes. 
