@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BeeGuardAI - Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            padding: 35px 40px;
+            color: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            font-size: 2.2em;
+            font-weight: 600;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 1em;
+            font-weight: 400;
+        }
+
+        .navbar {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 0 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 0;
+        }
+
+        .nav-links a {
+            padding: 20px 25px;
+            text-decoration: none;
+            color: #4b5563;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: #2a5298;
+            border-bottom-color: #2a5298;
+        }
+
+        .nav-links a.active {
+            color: #2a5298;
+            border-bottom-color: #2a5298;
+        }
+
+        .controls {
+            background: white;
+            padding: 25px 40px;
+            margin: 0;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        button {
+            background: #2a5298;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: #1e3c72;
+        }
+
+        button.secondary {
+            background: #6b7280;
+        }
+
+        button.secondary:hover {
+            background: #4b5563;
+        }
+
+        .content {
+            padding: 30px 40px;
+        }
+
+        .ruches-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .ruche-card {
+            background: white;
+            border-radius: 8px;
+            padding: 0;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .ruche-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .ruche-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .ruche-name {
+            font-size: 1.25em;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 4px;
+        }
+
+        .ruche-location {
+            color: #6b7280;
+            font-size: 0.875em;
+            font-weight: 400;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-normal { background: #d1fae5; color: #065f46; }
+        .status-warning { background: #fef3c7; color: #92400e; }
+        .status-danger { background: #fee2e2; color: #991b1b; }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1px;
+            background: #e5e7eb;
+            margin: 0;
+        }
+
+        .metric {
+            background: white;
+            padding: 18px 24px;
+        }
+
+        .metric-label {
+            color: #6b7280;
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            font-size: 1.75em;
+            font-weight: 600;
+            color: #111827;
+            line-height: 1;
+        }
+
+        .metric-unit {
+            font-size: 0.5em;
+            color: #9ca3af;
+            font-weight: 400;
+            margin-left: 4px;
+        }
+
+        .alert-section {
+            background: #fef3c7;
+            border-left: 3px solid #f59e0b;
+            padding: 16px 24px;
+            margin: 0;
+        }
+
+        .alert-title {
+            font-weight: 600;
+            color: #92400e;
+            margin-bottom: 4px;
+            font-size: 0.875em;
+        }
+
+        .alert-text {
+            color: #78350f;
+            font-size: 0.875em;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 80px 20px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .no-data h2 {
+            color: #374151;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .no-data p {
+            color: #6b7280;
+        }
+
+        .timestamp {
+            text-align: right;
+            color: #6b7280;
+            padding: 20px 40px;
+            font-size: 0.875em;
+        }
+
+        .card-footer {
+            padding: 14px 24px;
+            background: #f9fafb;
+            border-top: 1px solid #e5e7eb;
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.8em;
+        }
+
+        .charts-section {
+            background: white;
+            padding: 24px;
+            margin-top: 1px;
+        }
+
+        .chart-container {
+            height: 250px;
+            margin-top: 15px;
+        }
+
+        .chart-title {
+            font-size: 0.875em;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 10px;
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .view-toggle button {
+            font-size: 0.85em;
+            padding: 6px 12px;
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .view-toggle button.active {
+            background: #2a5298;
+            color: white;
+        }
+
+        .time-filter {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .time-filter button {
+            font-size: 0.8em;
+            padding: 5px 10px;
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .time-filter button.active {
+            background: #10b981;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>BeeGuardAI Dashboard</h1>
+        <p class="subtitle">Système de surveillance des ruches en temps réel - Sorbonne Université</p>
+    </header>
+
+    <div class="navbar">
+        <div class="nav-links">
+            <a href="/" class="active">Dashboard</a>
+            <a href="/manage-ruches.html">Gérer Ruches</a>
+            <a href="/api-keys.html">Clés API</a>
+        </div>
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <div id="user-info-nav" style="color: #6b7280; font-size: 0.9em;"></div>
+            <button onclick="handleLogout()" style="padding: 8px 16px;">Déconnexion</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="controls">
+            <button onclick="loadRuches()">Rafraîchir</button>
+            <button onclick="generateFakeData()" class="secondary">Générer Données Test</button>
+            <div style="flex: 1"></div>
+            <div id="user-info" style="margin-right: 20px; color: #6b7280; font-size: 0.9em;"></div>
+            <button onclick="handleLogout()" class="secondary">Déconnexion</button>
+            <div class="timestamp" id="last-update" style="margin: 0; padding: 0;"></div>
+        </div>
+
+        <div class="content">
+            <div id="ruches-container" class="ruches-grid"></div>
+        </div>
+    </div>
+
+    <script>
+        const TOKEN = localStorage.getItem('token');
+
+        // Check authentication
+        async function checkAuth() {
+            if (!TOKEN) {
+                window.location.href = '/login.html';
+                return false;
+            }
+
+            try {
+                const response = await fetch('/api/auth/me', {
+                    headers: {
+                        'Authorization': `Bearer ${TOKEN}`
+                    },
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    localStorage.removeItem('token');
+                    window.location.href = '/login.html';
+                    return false;
+                }
+
+                const user = await response.json();
+                const userText = `${user.prenom} ${user.nom} (${user.organisation_nom})`;
+                document.getElementById('user-info').textContent = userText;
+                document.getElementById('user-info-nav').textContent = userText;
+                return true;
+            } catch (error) {
+                localStorage.removeItem('token');
+                window.location.href = '/login.html';
+                return false;
+            }
+        }
+
+        async function handleLogout() {
+            try {
+                await fetch('/api/auth/logout', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+            localStorage.removeItem('token');
+            window.location.href = '/login.html';
+        }
+
+        async function loadRuches() {
+            try {
+                const response = await fetch('/api/donnees/latest', {
+                    headers: {
+                        'Authorization': `Bearer ${TOKEN}`
+                    },
+                    credentials: 'include'
+                });
+                const data = await response.json();
+
+                const container = document.getElementById('ruches-container');
+
+                if (data.length === 0) {
+                    container.innerHTML = `
+                        <div class="no-data">
+                            <h2>Aucune donnée disponible</h2>
+                            <p>Cliquez sur "Générer Données Test" pour créer des ruches de démonstration</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = data.map(ruche => {
+                    const hasData = ruche.nombre_frelons !== null;
+
+                    if (!hasData) {
+                        return `
+                            <div class="ruche-card">
+                                <div class="ruche-header">
+                                    <div>
+                                        <div class="ruche-name">${ruche.nom}</div>
+                                        <div class="ruche-location">${ruche.localisation}</div>
+                                    </div>
+                                    <span class="status-badge status-warning">En attente</span>
+                                </div>
+                                <div style="text-align: center; color: #9ca3af; padding: 60px 24px;">
+                                    Aucune donnée capteur disponible
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    const statusClass = ruche.nombre_frelons > 5 ? 'status-danger' :
+                                       ruche.nombre_frelons > 2 ? 'status-warning' : 'status-normal';
+
+                    const statusText = ruche.nombre_frelons > 5 ? 'Alerte' :
+                                      ruche.nombre_frelons > 2 ? 'Surveillance' : 'Normal';
+
+                    return `
+                        <div class="ruche-card">
+                            <div class="ruche-header">
+                                <div>
+                                    <div class="ruche-name">${ruche.nom}</div>
+                                    <div class="ruche-location">${ruche.localisation}</div>
+                                </div>
+                                <span class="status-badge ${statusClass}">${statusText}</span>
+                            </div>
+
+                            <div class="metrics">
+                                <div class="metric">
+                                    <div class="metric-label">Frelons Détectés</div>
+                                    <div class="metric-value">${ruche.nombre_frelons || 0}</div>
+                                </div>
+                                <div class="metric">
+                                    <div class="metric-label">Abeilles Entrées</div>
+                                    <div class="metric-value">${ruche.nombre_abeilles_entrees || 0}</div>
+                                </div>
+                                <div class="metric">
+                                    <div class="metric-label">Abeilles Sorties</div>
+                                    <div class="metric-value">${ruche.nombre_abeilles_sorties || 0}</div>
+                                </div>
+                                <div class="metric">
+                                    <div class="metric-label">Activité Nette</div>
+                                    <div class="metric-value">${(ruche.nombre_abeilles_entrees - ruche.nombre_abeilles_sorties) > 0 ? '+' : ''}${(ruche.nombre_abeilles_entrees - ruche.nombre_abeilles_sorties) || 0}</div>
+                                </div>
+                            </div>
+
+                            <div class="metrics">
+                                <div class="metric">
+                                    <div class="metric-label">Température</div>
+                                    <div class="metric-value">${ruche.temperature?.toFixed(1) || '-'}<span class="metric-unit">°C</span></div>
+                                </div>
+                                <div class="metric">
+                                    <div class="metric-label">Humidité</div>
+                                    <div class="metric-value">${ruche.humidite?.toFixed(0) || '-'}<span class="metric-unit">%</span></div>
+                                </div>
+                                <div class="metric">
+                                    <div class="metric-label">État Abeilles</div>
+                                    <div class="metric-value" style="font-size: 1em; text-transform: capitalize;">${ruche.etat_abeilles || 'N/A'}</div>
+                                </div>
+                                <div class="metric">
+                                    <div class="metric-label">État Acoustique</div>
+                                    <div class="metric-value" style="font-size: 0.9em; text-transform: capitalize;">${(ruche.etat_acoustique || 'N/A').replace('_', ' ')}</div>
+                                </div>
+                            </div>
+
+                            ${ruche.nombre_frelons > 0 ? `
+                                <div class="alert-section">
+                                    <div class="alert-title">Détection de Frelons Asiatiques</div>
+                                    <div class="alert-text">${ruche.nombre_frelons} frelon(s) détecté(s) dans les dernières minutes</div>
+                                </div>
+                            ` : ''}
+
+                            <div class="card-footer">
+                                Dernière mise à jour: ${new Date(ruche.timestamp).toLocaleString('fr-FR')}
+                            </div>
+
+                            <div class="charts-section">
+                                <div class="chart-title">Historique des Données</div>
+                                <div class="time-filter">
+                                    <button onclick="setTimeRange(${ruche.ruche_id}, 24)">24h</button>
+                                    <button onclick="setTimeRange(${ruche.ruche_id}, 72)">3 jours</button>
+                                    <button class="active" onclick="setTimeRange(${ruche.ruche_id}, 168)">1 semaine</button>
+                                    <button onclick="setTimeRange(${ruche.ruche_id}, 336)">2 semaines</button>
+                                </div>
+                                <div class="view-toggle">
+                                    <button class="active" onclick="showChart(${ruche.ruche_id}, 'overview')">Vue d'ensemble</button>
+                                    <button onclick="showChart(${ruche.ruche_id}, 'frelons')">Frelons</button>
+                                    <button onclick="showChart(${ruche.ruche_id}, 'abeilles')">Abeilles</button>
+                                    <button onclick="showChart(${ruche.ruche_id}, 'environment')">Température & Humidité</button>
+                                </div>
+                                <div class="chart-container">
+                                    <canvas id="chart-${ruche.ruche_id}"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                document.getElementById('last-update').textContent =
+                    `Dernière actualisation: ${new Date().toLocaleString('fr-FR', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                    })}`;
+
+            } catch (error) {
+                console.error('Erreur chargement données:', error);
+                document.getElementById('ruches-container').innerHTML =
+                    '<div class="no-data"><h2>Erreur de chargement des données</h2><p>Vérifiez que le serveur est démarré</p></div>';
+            }
+        }
+
+        async function generateFakeData() {
+            const button = event.target;
+            button.disabled = true;
+            button.textContent = 'Génération en cours...';
+
+            const ruches = [
+                { nom: 'Ruche St-Cyr 01', localisation: 'Saint-Cyr-l\'École' },
+                { nom: 'Ruche Jussieu 01', localisation: 'Campus Jussieu - Toit' },
+                { nom: 'Ruche St-Cyr 02', localisation: 'Saint-Cyr-l\'École' },
+                { nom: 'Ruche Jussieu 02', localisation: 'Campus Jussieu - Toit' }
+            ];
+
+            const etatsAbeilles = ['normal', 'affaiblies', 'normal', 'normal'];
+            const etatsAcoustique = ['normal', 'stress', 'normal', 'normal'];
+
+            try {
+                for (let i = 0; i < ruches.length; i++) {
+                    // Create or get ruche
+                    let rucheData;
+                    try {
+                        const rucheResp = await fetch('/api/ruches', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${TOKEN}`
+                            },
+                            credentials: 'include',
+                            body: JSON.stringify(ruches[i])
+                        });
+                        rucheData = await rucheResp.json();
+                    } catch (err) {
+                        console.log(`Ruche ${ruches[i].nom} existe déjà, skip`);
+                        continue;
+                    }
+
+                    // Generate 20 historical data points spread across the past week (much faster!)
+                    const dataPromises = [];
+                    const now = Date.now();
+                    const weekAgo = now - (7 * 24 * 60 * 60 * 1000); // 7 days ago
+
+                    for (let j = 0; j < 20; j++) {
+                        // Spread data points evenly across the week
+                        const timestamp = new Date(weekAgo + (j * (now - weekAgo) / 20));
+
+                        dataPromises.push(
+                            fetch('/api/donnees', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${TOKEN}`
+                                },
+                                credentials: 'include',
+                                body: JSON.stringify({
+                                    ruche_id: rucheData.id,
+                                    nombre_frelons: i === 1 ? Math.floor(Math.random() * 10) : Math.floor(Math.random() * 4),
+                                    nombre_abeilles_entrees: Math.floor(Math.random() * 50) + 40,
+                                    nombre_abeilles_sorties: Math.floor(Math.random() * 50) + 35,
+                                    temperature: parseFloat((Math.random() * 8 + 20).toFixed(1)),
+                                    humidite: parseFloat((Math.random() * 20 + 50).toFixed(1)),
+                                    etat_abeilles: etatsAbeilles[Math.floor(Math.random() * etatsAbeilles.length)],
+                                    etat_acoustique: etatsAcoustique[Math.floor(Math.random() * etatsAcoustique.length)],
+                                    timestamp: timestamp.toISOString()
+                                })
+                            })
+                        );
+                    }
+
+                    await Promise.all(dataPromises);
+                }
+
+                button.textContent = 'Générer Données Test';
+                button.disabled = false;
+                alert('✅ Données de test générées!\n\n4 ruches créées avec 20 points chacune.\nRafraîchissement...');
+                await loadRuches();
+                await initCharts();
+            } catch (err) {
+                console.error('Erreur génération données:', err);
+                button.textContent = 'Générer Données Test';
+                button.disabled = false;
+                alert('❌ Erreur: ' + err.message);
+            }
+        }
+
+        const charts = {};
+        const chartState = {}; // Store current state for each ruche
+
+        async function setTimeRange(rucheId, hours) {
+            // Update active button
+            const container = document.querySelector(`#chart-${rucheId}`).closest('.charts-section');
+            container.querySelectorAll('.time-filter button').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Store time range and reload chart
+            if (!chartState[rucheId]) chartState[rucheId] = { type: 'overview', hours: 168 };
+            chartState[rucheId].hours = hours;
+            await showChart(rucheId, chartState[rucheId].type);
+        }
+
+        async function showChart(rucheId, type) {
+            try {
+                console.log(`[showChart] Starting for ruche ${rucheId}, type: ${type}`);
+
+                // Update active button
+                const container = document.querySelector(`#chart-${rucheId}`).closest('.charts-section');
+                container.querySelectorAll('.view-toggle button').forEach(btn => btn.classList.remove('active'));
+                if (event && event.target) event.target.classList.add('active');
+
+                // Initialize state if needed
+                if (!chartState[rucheId]) chartState[rucheId] = { type: type, hours: 168 };
+                chartState[rucheId].type = type;
+
+                // Fetch historical data based on time range
+                const limit = chartState[rucheId].hours;
+                console.log(`[showChart] Fetching data for ruche ${rucheId}, limit: ${limit}`);
+                const response = await fetch(`/api/ruches/${rucheId}/donnees?limit=${limit}`, {
+                    headers: {
+                        'Authorization': `Bearer ${TOKEN}`
+                    },
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    console.error(`[showChart] API error: ${response.status} ${response.statusText}`);
+                    throw new Error(`API returned ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log(`[showChart] Received ${data.length} data points for ruche ${rucheId}`);
+
+                // Reverse to show oldest first
+                data.reverse();
+
+                // Format labels based on time range
+                const timeRange = chartState[rucheId].hours;
+                const labels = data.map(d => {
+                    const date = new Date(d.timestamp);
+                    if (timeRange <= 24) {
+                        // Show time for 24h view
+                        return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+                    } else if (timeRange <= 72) {
+                        // Show day and time for 3 days
+                        return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) + ' ' +
+                               date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+                    } else {
+                        // Show day and month for week+
+                        return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit' });
+                    }
+                });
+
+                let datasets = [];
+
+                if (type === 'overview') {
+                    datasets = [
+                        {
+                            label: 'Frelons Détectés',
+                            data: data.map(d => d.nombre_frelons),
+                            borderColor: '#ef4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Abeilles Entrées',
+                            data: data.map(d => d.nombre_abeilles_entrees),
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Abeilles Sorties',
+                            data: data.map(d => d.nombre_abeilles_sorties),
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ];
+                } else if (type === 'frelons') {
+                    datasets = [{
+                        label: 'Frelons Détectés',
+                        data: data.map(d => d.nombre_frelons),
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }];
+                } else if (type === 'abeilles') {
+                    datasets = [
+                        {
+                            label: 'Abeilles Entrées',
+                            data: data.map(d => d.nombre_abeilles_entrees),
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Abeilles Sorties',
+                            data: data.map(d => d.nombre_abeilles_sorties),
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ];
+                } else if (type === 'environment') {
+                    datasets = [
+                        {
+                            label: 'Température (°C)',
+                            data: data.map(d => d.temperature),
+                            borderColor: '#ef4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Humidité (%)',
+                            data: data.map(d => d.humidite),
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            yAxisID: 'y1'
+                        }
+                    ];
+                }
+
+                // Destroy existing chart
+                if (charts[rucheId]) {
+                    charts[rucheId].destroy();
+                }
+
+                // Create new chart
+                const ctx = document.getElementById(`chart-${rucheId}`);
+
+                const config = {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false,
+                        },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    title: (items) => {
+                                        if (items[0]) {
+                                            const index = items[0].dataIndex;
+                                            const timestamp = data[index].timestamp;
+                                            return new Date(timestamp).toLocaleString('fr-FR');
+                                        }
+                                        return '';
+                                    }
+                                }
+                            }
+                        },
+                        scales: type === 'environment' ? {
+                            y: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                                title: {
+                                    display: true,
+                                    text: 'Température (°C)'
+                                }
+                            },
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                title: {
+                                    display: true,
+                                    text: 'Humidité (%)'
+                                },
+                                grid: {
+                                    drawOnChartArea: false,
+                                }
+                            }
+                        } : {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                };
+
+                charts[rucheId] = new Chart(ctx, config);
+                console.log(`[showChart] Chart created successfully for ruche ${rucheId}`);
+
+            } catch (error) {
+                console.error(`[showChart] Error loading chart for ruche ${rucheId}:`, error);
+            }
+        }
+
+        async function initCharts() {
+            console.log('[initCharts] Starting chart initialization');
+            // Wait for ruches to load
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            // Get all ruche IDs and initialize with frelons chart
+            const ruches = document.querySelectorAll('[id^="chart-"]');
+            console.log(`[initCharts] Found ${ruches.length} chart canvases`);
+            ruches.forEach(canvas => {
+                const rucheId = canvas.id.replace('chart-', '');
+                console.log(`[initCharts] Initializing chart for ruche ${rucheId}`);
+                if (rucheId) {
+                    showChart(parseInt(rucheId), 'overview');
+                }
+            });
+        }
+
+        // Initialize app
+        checkAuth().then(isAuthenticated => {
+            if (isAuthenticated) {
+                loadRuches().then(() => initCharts());
+                // Reload data every 30 seconds but don't reinitialize charts
+                setInterval(() => {
+                    loadRuches();
+                }, 30000);
+            }
+        });
+    </script>
+</body>
+</html>
