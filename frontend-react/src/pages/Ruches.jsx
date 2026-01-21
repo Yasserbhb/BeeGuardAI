@@ -7,7 +7,6 @@ import {
   Box,
   AlertCircle,
   Wifi,
-  Edit2,
   Check,
   X,
   FolderOpen,
@@ -181,7 +180,7 @@ export default function Ruches() {
               type="text"
               value={editDeviceIdValue}
               onChange={(e) => setEditDeviceIdValue(e.target.value)}
-              placeholder="beehive-001"
+              placeholder="beehive-00000"
               className={styles.deviceIdInput}
               autoFocus
             />
@@ -193,13 +192,10 @@ export default function Ruches() {
             </button>
           </div>
         ) : (
-          <div className={styles.deviceIdDisplay}>
-            <code className={ruche.ttn_device_id ? styles.hasDeviceId : styles.noDeviceId}>
-              {ruche.ttn_device_id || 'Non configuré'}
+          <div className={styles.deviceIdDisplay} onClick={() => startEditDeviceId(ruche)} style={{cursor: 'pointer'}}>
+            <code className={styles.hasDeviceId} title="Cliquez pour modifier">
+              {ruche.ttn_device_id}
             </code>
-            <button className={styles.deviceIdBtn} onClick={() => startEditDeviceId(ruche)}>
-              <Edit2 size={12} />
-            </button>
           </div>
         )}
       </div>

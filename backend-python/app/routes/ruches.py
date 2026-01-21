@@ -2,12 +2,18 @@
 BeeGuardAI - Ruches Routes
 """
 
+import random
 from fastapi import APIRouter, HTTPException, Request
 from app.models import RucheCreate, RucheUpdate
 from app.db.mysql import get_db
 from app.routes.auth import get_current_user
 
 router = APIRouter(prefix="/api/ruches", tags=["ruches"])
+
+
+def generate_device_id():
+    """Generate a random device ID like beehive-48263"""
+    return f"beehive-{random.randint(10000, 99999)}"
 
 
 @router.post("")
@@ -17,17 +23,20 @@ async def create_ruche(ruche: RucheCreate, request: Request):
     if user["role"] not in ["admin", "gestionnaire"]:
         raise HTTPException(status_code=403, detail="Insufficient permissions")
 
+    # Auto-generate device ID
+    device_id = generate_device_id()
+
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute('''
-        INSERT INTO ruches (nom, rucher_id, organisation_id)
-        VALUES (%s, %s, %s)
-    ''', (ruche.nom, ruche.rucher_id, user["organisation_id"]))
+        INSERT INTO ruches (nom, ttn_device_id, rucher_id, organisation_id)
+        VALUES (%s, %s, %s, %s)
+    ''', (ruche.nom, device_id, ruche.rucher_id, user["organisation_id"]))
 
     ruche_id = cursor.lastrowid
     conn.close()
 
-    return {"id": ruche_id, "nom": ruche.nom, "rucher_id": ruche.rucher_id}
+    return {"id": ruche_id, "nom": ruche.nom, "ttn_device_id": device_id, "rucher_id": ruche.rucher_id}
 
 
 @router.get("")
@@ -65,12 +74,13 @@ async def update_ruche(ruche_id: int, ruche_data: RucheUpdate, request: Request)
     updates = []
     values = []
 
-    if ruche_data.nom is not None:
+    if ruche_data.nom is not None and ruche_data.nom != "":
         updates.append("nom = %s")
         values.append(ruche_data.nom)
     if ruche_data.ttn_device_id is not None:
+        # Allow empty string to clear the device ID
         updates.append("ttn_device_id = %s")
-        values.append(ruche_data.ttn_device_id)
+        values.append(ruche_data.ttn_device_id if ruche_data.ttn_device_id != "" else None)
     if ruche_data.rucher_id is not None:
         updates.append("rucher_id = %s")
         values.append(ruche_data.rucher_id if ruche_data.rucher_id != 0 else None)
