@@ -1,0 +1,335 @@
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.headerActions {
+  display: flex;
+  gap: 12px;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--bee-800);
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  color: var(--bee-500);
+  font-size: 1rem;
+}
+
+/* Breadcrumb */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.breadcrumbLink {
+  color: var(--honey-600);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.breadcrumbLink:hover {
+  color: var(--honey-700);
+  text-decoration: underline;
+}
+
+/* Stats Grid */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+/* Loading */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 16px;
+  color: var(--bee-500);
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--bee-200);
+  border-top-color: var(--honey-500);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Ruches Overview Grid */
+.ruchesOverviewGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.rucheOverviewCard {
+  padding: 20px;
+  background: linear-gradient(135deg, var(--honey-50) 0%, white 100%);
+  border: 2px solid var(--bee-100);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.rucheOverviewCard:hover {
+  border-color: var(--honey-400);
+  box-shadow: 0 8px 30px rgba(245, 158, 11, 0.15);
+  transform: translateY(-2px);
+}
+
+.rucheAlert {
+  border-color: rgba(239, 68, 68, 0.3);
+  background: linear-gradient(135deg, rgba(254, 226, 226, 0.5) 0%, white 100%);
+}
+
+.rucheAlert:hover {
+  border-color: var(--danger);
+}
+
+.rucheOverviewHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.rucheOverviewName {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--bee-800);
+}
+
+.rucheOverviewStatus {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.rucheLocation {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--bee-500);
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+}
+
+.rucheOverviewStats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  padding: 16px 0;
+  border-top: 1px solid var(--bee-100);
+  border-bottom: 1px solid var(--bee-100);
+}
+
+.rucheOverviewStat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.statValue {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--bee-700);
+}
+
+.iconTemp {
+  color: var(--honey-500);
+}
+
+.iconHum {
+  color: #3b82f6;
+}
+
+.iconAlert {
+  color: var(--danger);
+}
+
+.iconOk {
+  color: var(--success);
+}
+
+.iconActivity {
+  color: var(--success);
+}
+
+.rucheOverviewFooter {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px;
+  margin-top: 12px;
+  color: var(--honey-600);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* Status badges */
+.statusOk {
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--success);
+}
+
+.statusWarning {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* Time Filter Bar */
+.timeFilterBar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+
+.timeFilterLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  color: var(--bee-600);
+  white-space: nowrap;
+}
+
+.timeFilterButtons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.timeFilterBtn {
+  padding: 8px 16px;
+  background: var(--bee-100);
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--bee-600);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.timeFilterBtn:hover {
+  background: var(--bee-200);
+}
+
+.timeFilterActive {
+  background: var(--honey-500);
+  color: white;
+}
+
+.timeFilterActive:hover {
+  background: var(--honey-600);
+}
+
+/* Charts Grid */
+.chartsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.chartCard {
+  min-height: 380px;
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.chartContainer {
+  width: 100%;
+  height: 300px;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .rucheOverviewStats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .chartsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .fullWidth {
+    grid-column: 1;
+  }
+
+  .ruchesOverviewGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .headerActions {
+    flex-direction: column;
+  }
+
+  .title {
+    font-size: 1.6rem;
+  }
+
+  .breadcrumb {
+    flex-wrap: wrap;
+  }
+
+  .rucheOverviewStats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

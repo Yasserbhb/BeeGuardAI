@@ -1,0 +1,150 @@
+.statCard {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-normal);
+  border: 1px solid var(--bee-100);
+  position: relative;
+  overflow: hidden;
+}
+
+.statCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+}
+
+.statCard:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl);
+}
+
+.iconWrapper {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--bee-500);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.valueRow {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.value {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.unit {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--bee-500);
+}
+
+.subtitle {
+  font-size: 0.8rem;
+  color: var(--bee-400);
+  display: block;
+  margin-top: 4px;
+}
+
+.trend {
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: inline-block;
+  margin-top: 8px;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.trendUp {
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--success);
+}
+
+.trendDown {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger);
+}
+
+/* Colors */
+.colorHoney .iconWrapper {
+  background: var(--honey-100);
+  color: var(--honey-600);
+}
+.colorHoney::before {
+  background: linear-gradient(90deg, var(--honey-400), var(--honey-500));
+}
+.colorHoney .value {
+  color: var(--honey-700);
+}
+
+.colorGreen .iconWrapper {
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--success);
+}
+.colorGreen::before {
+  background: linear-gradient(90deg, #22c55e, #16a34a);
+}
+.colorGreen .value {
+  color: var(--success);
+}
+
+.colorBlue .iconWrapper {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--info);
+}
+.colorBlue::before {
+  background: linear-gradient(90deg, #3b82f6, #2563eb);
+}
+.colorBlue .value {
+  color: var(--info);
+}
+
+.colorRed .iconWrapper {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger);
+}
+.colorRed::before {
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+}
+.colorRed .value {
+  color: var(--danger);
+}
+
+.colorPurple .iconWrapper {
+  background: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
+}
+.colorPurple::before {
+  background: linear-gradient(90deg, #8b5cf6, #7c3aed);
+}
+.colorPurple .value {
+  color: #7c3aed;
+}

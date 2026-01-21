@@ -1,0 +1,459 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.headerActions {
+  display: flex;
+  gap: 12px;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--bee-800);
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  color: var(--bee-500);
+  font-size: 1rem;
+}
+
+/* Loading */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 16px;
+  color: var(--bee-500);
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--bee-200);
+  border-top-color: var(--honey-500);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Info Card */
+.infoCard {
+  background: linear-gradient(135deg, var(--honey-50) 0%, white 100%);
+  border: 1px solid var(--honey-200);
+}
+
+.infoBox {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.infoBox svg {
+  color: var(--honey-600);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.infoBox strong {
+  display: block;
+  color: var(--bee-800);
+  margin-bottom: 4px;
+}
+
+.infoBox p {
+  color: var(--bee-600);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Form Card */
+.formCard {
+  max-width: 500px;
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: var(--danger);
+  padding: 14px 18px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.selectGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.selectGroup label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--bee-700);
+}
+
+.select {
+  padding: 12px 16px;
+  border: 2px solid var(--bee-200);
+  border-radius: 10px;
+  font-size: 1rem;
+  background: white;
+  color: var(--bee-800);
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.select:focus {
+  outline: none;
+  border-color: var(--honey-500);
+}
+
+/* Empty State */
+.empty {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.emptyIcon {
+  color: var(--bee-300);
+  margin-bottom: 16px;
+}
+
+.empty h3 {
+  font-size: 1.2rem;
+  color: var(--bee-700);
+  margin-bottom: 8px;
+}
+
+.empty p {
+  color: var(--bee-500);
+  margin-bottom: 24px;
+}
+
+.emptyActions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Ruchers Container */
+.ruchersContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Rucher Card */
+.rucherCard {
+  overflow: hidden;
+}
+
+.rucherHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  border-bottom: 1px solid var(--bee-100);
+}
+
+.rucherHeader:hover {
+  background: var(--bee-50);
+}
+
+.rucherToggle {
+  color: var(--bee-400);
+  flex-shrink: 0;
+}
+
+.rucherIcon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, var(--honey-100) 0%, var(--honey-200) 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--honey-600);
+  flex-shrink: 0;
+}
+
+.rucherIcon.unassigned {
+  background: linear-gradient(135deg, var(--bee-100) 0%, var(--bee-200) 100%);
+  color: var(--bee-500);
+}
+
+.rucherInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.rucherName {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--bee-800);
+  margin-bottom: 4px;
+}
+
+.rucherLocation {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--bee-500);
+  margin: 0;
+}
+
+.rucherLocation svg {
+  color: var(--bee-400);
+}
+
+.rucherCount {
+  background: var(--bee-100);
+  color: var(--bee-600);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+/* Ruches Grid (inside rucher) */
+.ruchesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  padding: 20px 24px;
+  background: var(--bee-50);
+}
+
+.noRuches {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--bee-400);
+  font-style: italic;
+  padding: 20px;
+}
+
+/* Ruche Card (compact version) */
+.rucheCard {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid var(--bee-200);
+  transition: all var(--transition-fast);
+}
+
+.rucheCard:hover {
+  border-color: var(--honey-300);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.rucheHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.rucheIcon {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, var(--honey-100) 0%, var(--honey-200) 100%);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--honey-600);
+  flex-shrink: 0;
+}
+
+.rucheName {
+  flex: 1;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--bee-800);
+  margin: 0;
+}
+
+.deleteBtn {
+  color: var(--bee-400);
+  opacity: 0;
+  transition: all var(--transition-normal);
+}
+
+.rucheCard:hover .deleteBtn,
+.rucherHeader:hover .deleteBtn {
+  opacity: 1;
+}
+
+.deleteBtn:hover {
+  color: var(--danger) !important;
+  background: rgba(239, 68, 68, 0.1) !important;
+}
+
+/* Device ID Section */
+.deviceIdSection {
+  background: var(--bee-50);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.deviceIdLabel {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--bee-500);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.deviceIdLabel svg {
+  color: var(--bee-400);
+}
+
+.deviceIdDisplay {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.deviceIdDisplay code {
+  flex: 1;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 0.8rem;
+  padding: 4px 8px;
+  background: white;
+  border-radius: 4px;
+  border: 1px solid var(--bee-200);
+}
+
+.hasDeviceId {
+  color: var(--bee-800);
+}
+
+.noDeviceId {
+  color: var(--bee-400);
+  font-style: italic;
+}
+
+.deviceIdEdit {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.deviceIdInput {
+  flex: 1;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 0.8rem;
+  padding: 6px 10px;
+  background: white;
+  border: 2px solid var(--honey-400);
+  border-radius: 6px;
+  outline: none;
+}
+
+.deviceIdInput:focus {
+  border-color: var(--honey-500);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+}
+
+.deviceIdBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: none;
+  background: var(--bee-100);
+  color: var(--bee-600);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.deviceIdBtn:hover {
+  background: var(--honey-500);
+  color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .headerActions {
+    flex-direction: column;
+  }
+
+  .title {
+    font-size: 1.6rem;
+  }
+
+  .rucherHeader {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .rucherIcon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .rucherCount {
+    display: none;
+  }
+
+  .ruchesGrid {
+    grid-template-columns: 1fr;
+    padding: 16px;
+  }
+
+  .deleteBtn {
+    opacity: 1;
+  }
+}

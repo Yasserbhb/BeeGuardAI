@@ -1,0 +1,22 @@
+apiVersion: 1
+
+deleteDatasources:
+  - name: InfluxDB
+    orgId: 1
+
+datasources:
+  - name: InfluxDB
+    uid: influxdb
+    type: influxdb
+    access: proxy
+    url: http://influxdb:8086
+    orgId: 1
+    jsonData:
+      version: Flux
+      organization: beeguardai
+      defaultBucket: sensor_data
+      httpMode: POST
+    secureJsonData:
+      token: beeguardai-super-secret-token
+    isDefault: true
+    editable: true
