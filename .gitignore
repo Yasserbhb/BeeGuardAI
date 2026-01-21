@@ -69,3 +69,7 @@ coverage/
 # OS
 Thumbs.db
 Desktop.ini
+
+
+#ngrok recovery files
+ngrok*
