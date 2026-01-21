@@ -1,5 +1,4 @@
 services:
-  # MySQL Database
   mysql:
     image: mysql:8.0
     container_name: beeguardai-mysql
@@ -8,19 +7,16 @@ services:
     volumes:
       - mysql-data:/var/lib/mysql
     environment:
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-    command: --default-authentication-plugin=mysql_native_password
-    restart: unless-stopped
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-beeguardai}
+      MYSQL_USER: ${MYSQL_USER:-beeguard}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-secretpassword}
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  # InfluxDB - Time-series database
   influxdb:
     image: influxdb:2.7
     container_name: beeguardai-influxdb
@@ -28,108 +24,68 @@ services:
       - "8086:8086"
     volumes:
       - influxdb-data:/var/lib/influxdb2
-      - influxdb-config:/etc/influxdb2
     environment:
-      - DOCKER_INFLUXDB_INIT_MODE=setup
-      - DOCKER_INFLUXDB_INIT_USERNAME=${INFLUX_ADMIN_USER}
-      - DOCKER_INFLUXDB_INIT_PASSWORD=${INFLUX_ADMIN_PASSWORD}
-      - DOCKER_INFLUXDB_INIT_ORG=${INFLUX_ORG}
-      - DOCKER_INFLUXDB_INIT_BUCKET=${INFLUX_BUCKET}
-      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUX_TOKEN}
-    restart: unless-stopped
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: ${INFLUX_ADMIN_USER:-admin}
+      DOCKER_INFLUXDB_INIT_PASSWORD: ${INFLUX_ADMIN_PASSWORD:-admin123}
+      DOCKER_INFLUXDB_INIT_ORG: ${INFLUX_ORG:-beeguardai}
+      DOCKER_INFLUXDB_INIT_BUCKET: ${INFLUX_BUCKET:-sensor_data}
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: ${INFLUX_TOKEN:-beeguardai-super-secret-token}
 
-  # Grafana - Dashboards
-  grafana:
-    image: grafana/grafana:latest
-    container_name: beeguardai-grafana
-    ports:
-      - "3001:3000"
-    volumes:
-      - grafana-data:/var/lib/grafana
-      - ./grafana/provisioning:/etc/grafana/provisioning
-      - ./grafana/dashboards:/var/lib/grafana/dashboards
-    environment:
-      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER}
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
-      - GF_USERS_ALLOW_SIGN_UP=false
-      - GF_AUTH_ANONYMOUS_ENABLED=true
-      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
-      - GF_SECURITY_ALLOW_EMBEDDING=true
-    depends_on:
-      - influxdb
-    restart: unless-stopped
-
-  # Backend - FastAPI
   backend:
-    build:
-      context: ./backend-python
-      dockerfile: Dockerfile
+    build: ./backend-python
     container_name: beeguardai-backend
     ports:
       - "8000:8000"
     environment:
-      # MySQL
-      - MYSQL_HOST=mysql
-      - MYSQL_PORT=3306
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
-      # InfluxDB
-      - INFLUX_URL=http://influxdb:8086
-      - INFLUX_TOKEN=${INFLUX_TOKEN}
-      - INFLUX_ORG=${INFLUX_ORG}
-      - INFLUX_BUCKET=${INFLUX_BUCKET}
+      PORT: 8000
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USER: ${MYSQL_USER:-beeguard}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-secretpassword}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-beeguardai}
+      INFLUX_URL: http://influxdb:8086
+      INFLUX_TOKEN: ${INFLUX_TOKEN:-beeguardai-super-secret-token}
+      INFLUX_ORG: ${INFLUX_ORG:-beeguardai}
+      INFLUX_BUCKET: ${INFLUX_BUCKET:-sensor_data}
     depends_on:
       mysql:
         condition: service_healthy
       influxdb:
         condition: service_started
-    restart: unless-stopped
 
-  # Frontend - React + Nginx
   frontend:
-    build:
-      context: ./frontend-react
-      dockerfile: Dockerfile
+    build: ./frontend-react
     container_name: beeguardai-frontend
     ports:
       - "80:80"
     depends_on:
       - backend
-    restart: unless-stopped
 
-  # MQTT Listener - TTN Integration
   mqtt-listener:
-    build:
-      context: ./backend-python
-      dockerfile: Dockerfile
+    build: ./backend-python
     container_name: beeguardai-mqtt
     command: ["python", "mqtt_listener.py"]
     environment:
-      # MySQL (for ruche lookup by ttn_device_id)
-      - MYSQL_HOST=mysql
-      - MYSQL_PORT=3306
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
-      # InfluxDB
-      - INFLUX_URL=http://influxdb:8086
-      - INFLUX_TOKEN=${INFLUX_TOKEN}
-      - INFLUX_ORG=${INFLUX_ORG}
-      - INFLUX_BUCKET=${INFLUX_BUCKET}
-      # TTN
-      - TTN_HOST=eu1.cloud.thethings.network
-      - TTN_APP_ID=${TTN_APP_ID}
-      - TTN_API_KEY=${TTN_API_KEY}
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USER: ${MYSQL_USER:-beeguard}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-secretpassword}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-beeguardai}
+      INFLUX_URL: http://influxdb:8086
+      INFLUX_TOKEN: ${INFLUX_TOKEN:-beeguardai-super-secret-token}
+      INFLUX_ORG: ${INFLUX_ORG:-beeguardai}
+      INFLUX_BUCKET: ${INFLUX_BUCKET:-sensor_data}
+      TTN_HOST: ${TTN_HOST:-eu1.cloud.thethings.network}
+      TTN_PORT: ${TTN_PORT:-1883}
+      TTN_APP_ID: ${TTN_APP_ID:-your-ttn-app-id}
+      TTN_API_KEY: ${TTN_API_KEY:-your-ttn-api-key}
     depends_on:
       mysql:
         condition: service_healthy
       influxdb:
         condition: service_started
-    restart: unless-stopped
 
 volumes:
   mysql-data:
   influxdb-data:
-  influxdb-config:
-  grafana-data:
