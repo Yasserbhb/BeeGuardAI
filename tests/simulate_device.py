@@ -12,52 +12,48 @@ from datetime import datetime
 
 # Configuration
 API_URL = "http://localhost:8000/api/iot/data"
-INTERVAL = 10  # seconds between each data point
-DURATION = 300  # 5 minutes total
+INTERVAL = 5  # seconds between each data point
+DURATION = 600  # 10 minutes total
 
-# Ruches configuration with realistic scenarios
+# All ruches from database
 RUCHES = [
-    {
-        "id": 1,
-        "name": "Ruche Alpha",
-        "scenario": "healthy",  # Healthy hive, normal activity
-        "temp_range": (32, 36),  # Ideal brood temperature
-        "humidity_range": (55, 65),
-        "hornets_chance": 0.1,  # 10% chance of hornets
-    },
-    {
-        "id": 2,
-        "name": "Ruche Beta",
-        "scenario": "active",  # Very active hive, lots of bees
-        "temp_range": (30, 35),
-        "humidity_range": (50, 70),
-        "hornets_chance": 0.2,  # 20% chance of hornets
-    },
-    {
-        "id": 3,
-        "name": "Ruche Gamma",
-        "scenario": "stressed",  # Stressed hive, more hornets
-        "temp_range": (28, 38),  # More variable temperature
-        "humidity_range": (45, 75),
-        "hornets_chance": 0.4,  # 40% chance of hornets
-    },
+    # Organisation 1 (Sorbonne - admin@sorbonne.fr)
+    {"id": 1, "name": "Ruche Alpha", "scenario": "healthy"},
+    {"id": 2, "name": "Ruche Beta", "scenario": "active"},
+    {"id": 3, "name": "Ruche Gamma", "scenario": "stressed"},
+    {"id": 7, "name": "Ruche 333", "scenario": "healthy"},
+    # Organisation 2 (arezki@gmail.com)
+    {"id": 4, "name": "ruche alpha", "scenario": "active"},
+    # Organisation 3 (amine.naitsiahmed@gmail.com)
+    {"id": 5, "name": "ruche de amine", "scenario": "healthy"},
+    {"id": 6, "name": "RUCHE BETA", "scenario": "stressed"},
+    # Organisation 4 (Test)
+    {"id": 8, "name": "Test", "scenario": "healthy"},
 ]
+
+# Scenario configs
+SCENARIOS = {
+    "healthy": {"temp_range": (32, 36), "humidity_range": (55, 65), "hornets_chance": 0.1},
+    "active": {"temp_range": (30, 35), "humidity_range": (50, 70), "hornets_chance": 0.2},
+    "stressed": {"temp_range": (28, 38), "humidity_range": (45, 75), "hornets_chance": 0.4},
+}
 
 
 def generate_sensor_data(ruche):
     """Generate realistic sensor data based on ruche scenario"""
     scenario = ruche["scenario"]
+    config = SCENARIOS[scenario]
 
     # Temperature
-    temp_min, temp_max = ruche["temp_range"]
+    temp_min, temp_max = config["temp_range"]
     temperature = round(random.uniform(temp_min, temp_max), 1)
 
     # Humidity
-    hum_min, hum_max = ruche["humidity_range"]
+    hum_min, hum_max = config["humidity_range"]
     humidity = round(random.uniform(hum_min, hum_max), 1)
 
     # Hornets based on scenario
-    if random.random() < ruche["hornets_chance"]:
+    if random.random() < config["hornets_chance"]:
         hornets = random.randint(1, 5 if scenario == "stressed" else 3)
     else:
         hornets = 0
