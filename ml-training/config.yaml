@@ -1,0 +1,12 @@
+# config.yaml
+# Use the absolute path to your 'data' folder
+path: C:/Users/yasse/Desktop/BeeGuardAI/ml-training/data
+
+# Updated 'val' to 'valid' to match your folder name
+train: train/images
+val: valid/images
+
+nc: 2
+names:
+  0: bee
+  1: hornet

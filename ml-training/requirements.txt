@@ -1,0 +1,7 @@
+# BeeGuardAI - ML Training Requirements (YOLO-based)
+ultralytics>=8.0.0    # YOLOv8
+opencv-python>=4.8.0
+numpy>=1.24.0
+matplotlib>=3.7.0
+pillow>=10.0.0
+pyyaml>=6.0
