@@ -74,3 +74,11 @@ Desktop.ini
 #ngrok recovery files
 ngrok*
 BeeGuardAI*
+
+
+
+#ML Training
+ml-training/data
+ml-training/models
+ml-training/runs/mlflow
+ml-training/runs/detect
