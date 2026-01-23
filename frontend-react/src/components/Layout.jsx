@@ -1,18 +1,22 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import {
   LayoutDashboard,
   Box,
   LogOut,
   User,
   Menu,
-  X
+  X,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { useState } from 'react';
 import styles from './Layout.module.css';
 
 export default function Layout({ children }) {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -63,6 +67,9 @@ export default function Layout({ children }) {
 
           {/* User Menu */}
           <div className={styles.userMenu}>
+            <button onClick={toggleTheme} className={styles.themeBtn} title={theme === 'light' ? 'Mode sombre' : 'Mode clair'}>
+              {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+            </button>
             <div className={styles.userInfo}>
               <User size={18} />
               <span>{user?.prenom} {user?.nom}</span>

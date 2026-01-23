@@ -125,6 +125,26 @@
   color: #fca5a5;
 }
 
+.themeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--bee-600);
+  border-radius: 8px;
+  color: var(--honey-300);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.themeBtn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: var(--honey-400);
+  color: var(--honey-400);
+}
+
 /* Mobile */
 .mobileMenuBtn {
   display: none;

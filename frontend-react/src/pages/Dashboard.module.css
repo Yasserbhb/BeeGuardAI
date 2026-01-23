@@ -21,12 +21,12 @@
 .title {
   font-size: 2rem;
   font-weight: 700;
-  color: var(--bee-800);
+  color: var(--text-primary);
   margin-bottom: 4px;
 }
 
 .subtitle {
-  color: var(--bee-500);
+  color: var(--text-secondary);
   font-size: 1rem;
 }
 
@@ -63,13 +63,13 @@
   justify-content: center;
   min-height: 400px;
   gap: 16px;
-  color: var(--bee-500);
+  color: var(--text-secondary);
 }
 
 .spinner {
   width: 40px;
   height: 40px;
-  border: 3px solid var(--bee-200);
+  border: 3px solid var(--border-color);
   border-top-color: var(--honey-500);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -88,8 +88,8 @@
 
 .rucheOverviewCard {
   padding: 20px;
-  background: linear-gradient(135deg, var(--honey-50) 0%, white 100%);
-  border: 2px solid var(--bee-100);
+  background: var(--bg-card);
+  border: 2px solid var(--border-color);
   border-radius: 16px;
   cursor: pointer;
   transition: all var(--transition-normal);
@@ -103,7 +103,7 @@
 
 .rucheAlert {
   border-color: rgba(239, 68, 68, 0.3);
-  background: linear-gradient(135deg, rgba(254, 226, 226, 0.5) 0%, white 100%);
+  background: rgba(239, 68, 68, 0.05);
 }
 
 .rucheAlert:hover {
@@ -120,7 +120,7 @@
 .rucheOverviewName {
   font-weight: 700;
   font-size: 1.1rem;
-  color: var(--bee-800);
+  color: var(--text-primary);
 }
 
 .rucheOverviewStatus {
@@ -136,7 +136,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  color: var(--bee-500);
+  color: var(--text-secondary);
   font-size: 0.85rem;
   margin-bottom: 16px;
 }
@@ -146,8 +146,8 @@
   grid-template-columns: repeat(4, 1fr);
   gap: 12px;
   padding: 16px 0;
-  border-top: 1px solid var(--bee-100);
-  border-bottom: 1px solid var(--bee-100);
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .rucheOverviewStat {
@@ -160,7 +160,7 @@
 .statValue {
   font-weight: 600;
   font-size: 0.95rem;
-  color: var(--bee-700);
+  color: var(--text-primary);
 }
 
 .iconTemp {
@@ -217,9 +217,10 @@
   align-items: center;
   gap: 16px;
   padding: 16px 20px;
-  background: white;
+  background: var(--bg-card);
   border-radius: 12px;
   box-shadow: var(--shadow);
+  border: 1px solid var(--border-color);
 }
 
 .timeFilterLabel {
@@ -227,7 +228,7 @@
   align-items: center;
   gap: 8px;
   font-weight: 500;
-  color: var(--bee-600);
+  color: var(--text-secondary);
   white-space: nowrap;
 }
 
@@ -239,18 +240,18 @@
 
 .timeFilterBtn {
   padding: 8px 16px;
-  background: var(--bee-100);
+  background: var(--bg-tertiary);
   border: none;
   border-radius: 8px;
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--bee-600);
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all var(--transition-fast);
 }
 
 .timeFilterBtn:hover {
-  background: var(--bee-200);
+  background: var(--border-color);
 }
 
 .timeFilterActive {
@@ -268,9 +269,10 @@
   align-items: flex-end;
   gap: 16px;
   padding: 16px 20px;
-  background: white;
+  background: var(--bg-card);
   border-radius: 12px;
   box-shadow: var(--shadow);
+  border: 1px solid var(--border-color);
   flex-wrap: wrap;
 }
 
@@ -286,15 +288,16 @@
   gap: 6px;
   font-size: 0.85rem;
   font-weight: 500;
-  color: var(--bee-600);
+  color: var(--text-secondary);
 }
 
 .dateInputGroup input {
   padding: 10px 12px;
-  border: 1px solid var(--bee-200);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   font-size: 0.9rem;
-  color: var(--bee-700);
+  color: var(--text-primary);
+  background: var(--input-bg);
 }
 
 .dateInputGroup input:focus {

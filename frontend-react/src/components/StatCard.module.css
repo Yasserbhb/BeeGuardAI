@@ -1,5 +1,5 @@
 .statCard {
-  background: white;
+  background: var(--bg-card);
   border-radius: 16px;
   padding: 24px;
   display: flex;
@@ -7,7 +7,7 @@
   align-items: flex-start;
   box-shadow: var(--shadow-md);
   transition: all var(--transition-normal);
-  border: 1px solid var(--bee-100);
+  border: 1px solid var(--border-color);
   position: relative;
   overflow: hidden;
 }
@@ -44,7 +44,7 @@
 .title {
   font-size: 0.85rem;
   font-weight: 500;
-  color: var(--bee-500);
+  color: var(--text-secondary);
   display: block;
   margin-bottom: 4px;
 }
@@ -64,12 +64,12 @@
 .unit {
   font-size: 1rem;
   font-weight: 500;
-  color: var(--bee-500);
+  color: var(--text-secondary);
 }
 
 .subtitle {
   font-size: 0.8rem;
-  color: var(--bee-400);
+  color: var(--text-muted);
   display: block;
   margin-top: 4px;
 }
