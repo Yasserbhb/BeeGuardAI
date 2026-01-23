@@ -62,30 +62,6 @@ services:
     depends_on:
       - backend
 
-  mqtt-listener:
-    build: ./backend-python
-    container_name: beeguardai-mqtt
-    command: ["python", "mqtt_listener.py"]
-    environment:
-      MYSQL_HOST: mysql
-      MYSQL_PORT: 3306
-      MYSQL_USER: ${MYSQL_USER:-beeguard}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-secretpassword}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-beeguardai}
-      INFLUX_URL: http://influxdb:8086
-      INFLUX_TOKEN: ${INFLUX_TOKEN:-beeguardai-super-secret-token}
-      INFLUX_ORG: ${INFLUX_ORG:-beeguardai}
-      INFLUX_BUCKET: ${INFLUX_BUCKET:-sensor_data}
-      TTN_HOST: ${TTN_HOST:-eu1.cloud.thethings.network}
-      TTN_PORT: ${TTN_PORT:-1883}
-      TTN_APP_ID: ${TTN_APP_ID:-your-ttn-app-id}
-      TTN_API_KEY: ${TTN_API_KEY:-your-ttn-api-key}
-    depends_on:
-      mysql:
-        condition: service_healthy
-      influxdb:
-        condition: service_started
-
 volumes:
   mysql-data:
   influxdb-data:
