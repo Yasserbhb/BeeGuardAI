@@ -32,6 +32,7 @@ def write_sensor_data(data: dict):
         .field("nombre_abeilles_sorties", int(data.get("nombre_abeilles_sorties", 0))) \
         .field("temperature", float(data.get("temperature", 0))) \
         .field("humidite", float(data.get("humidite", 0))) \
+        .field("luminosite", int(data.get("luminosite", 1))) \
         .field("etat_abeilles", str(data.get("etat_abeilles", "normal"))) \
         .field("etat_acoustique", str(data.get("etat_acoustique", "normal")))
 
@@ -63,6 +64,7 @@ def get_latest_data():
                 "nombre_abeilles_sorties": record.values.get("nombre_abeilles_sorties", 0),
                 "temperature": record.values.get("temperature", 0),
                 "humidite": record.values.get("humidite", 0),
+                "luminosite": record.values.get("luminosite", 1),
                 "etat_abeilles": record.values.get("etat_abeilles", "normal"),
                 "etat_acoustique": record.values.get("etat_acoustique", "normal"),
                 "timestamp": record.get_time().isoformat()
@@ -71,11 +73,16 @@ def get_latest_data():
     return data
 
 
-def get_historical_data(ruche_id: int, hours: int = 168):
+def get_historical_data(ruche_id: int, hours: int = 168, start_time: str = None, end_time: str = None):
     """Get historical data for a specific beehive"""
+    if start_time and end_time:
+        time_range = f'range(start: {start_time}, stop: {end_time})'
+    else:
+        time_range = f'range(start: -{hours}h)'
+
     query = f'''
         from(bucket: "{INFLUX_BUCKET}")
-            |> range(start: -{hours}h)
+            |> {time_range}
             |> filter(fn: (r) => r._measurement == "sensor_data")
             |> filter(fn: (r) => r.ruche_id == "{ruche_id}")
             |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
@@ -94,6 +101,7 @@ def get_historical_data(ruche_id: int, hours: int = 168):
                 "nombre_abeilles_sorties": record.values.get("nombre_abeilles_sorties", 0),
                 "temperature": record.values.get("temperature", 0),
                 "humidite": record.values.get("humidite", 0),
+                "luminosite": record.values.get("luminosite", 1),
                 "etat_abeilles": record.values.get("etat_abeilles", "normal"),
                 "etat_acoustique": record.values.get("etat_acoustique", "normal")
             })

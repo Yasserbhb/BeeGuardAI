@@ -94,8 +94,13 @@ export const ruches = {
   delete: (id) =>
     apiCall(`/ruches/${id}`, { method: 'DELETE' }),
 
-  getData: (id, hours = 168) =>
-    apiCall(`/ruches/${id}/donnees?hours=${hours}`),
+  getData: (id, hours = 168, start = null, end = null) => {
+    let url = `/ruches/${id}/donnees?hours=${hours}`;
+    if (start && end) {
+      url += `&start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`;
+    }
+    return apiCall(url);
+  },
 };
 
 // ============================================

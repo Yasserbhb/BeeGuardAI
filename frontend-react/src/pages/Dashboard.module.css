@@ -262,6 +262,46 @@
   background: var(--honey-600);
 }
 
+/* Custom Date Picker */
+.customDatePicker {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  padding: 16px 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  flex-wrap: wrap;
+}
+
+.dateInputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dateInputGroup label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--bee-600);
+}
+
+.dateInputGroup input {
+  padding: 10px 12px;
+  border: 1px solid var(--bee-200);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: var(--bee-700);
+}
+
+.dateInputGroup input:focus {
+  outline: none;
+  border-color: var(--honey-500);
+}
+
 /* Charts Grid */
 .chartsGrid {
   display: grid;

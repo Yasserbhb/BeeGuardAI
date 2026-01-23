@@ -44,6 +44,10 @@ def generate_sensor_data(ruche):
     scenario = ruche["scenario"]
     config = SCENARIOS[scenario]
 
+    # Luminosity based on time (day=1 between 6h-21h, night=0 otherwise)
+    hour = datetime.now().hour
+    luminosite = 1 if 6 <= hour < 21 else 0
+
     # Temperature
     temp_min, temp_max = config["temp_range"]
     temperature = round(random.uniform(temp_min, temp_max), 1)
@@ -52,33 +56,41 @@ def generate_sensor_data(ruche):
     hum_min, hum_max = config["humidity_range"]
     humidity = round(random.uniform(hum_min, hum_max), 1)
 
-    # Hornets based on scenario
-    if random.random() < config["hornets_chance"]:
-        hornets = random.randint(1, 5 if scenario == "stressed" else 3)
-    else:
+    # At night, reduce hornet/bee activity
+    if luminosite == 0:
         hornets = 0
-
-    # Bee activity based on scenario
-    if scenario == "healthy":
-        bees_in = random.randint(80, 150)
-        bees_out = random.randint(70, 140)
+        bees_in = random.randint(0, 5)
+        bees_out = random.randint(0, 5)
         bee_status = "normal"
-    elif scenario == "active":
-        bees_in = random.randint(150, 250)
-        bees_out = random.randint(140, 230)
-        bee_status = random.choice(["normal", "active"])
-    else:  # stressed
-        bees_in = random.randint(40, 100)
-        bees_out = random.randint(50, 120)
-        bee_status = random.choice(["normal", "agitated", "stressed"])
-
-    # Acoustic status
-    if hornets > 2:
-        acoustic = "alert"
-    elif hornets > 0:
-        acoustic = "loud"
-    else:
         acoustic = "normal"
+    else:
+        # Hornets based on scenario
+        if random.random() < config["hornets_chance"]:
+            hornets = random.randint(1, 5 if scenario == "stressed" else 3)
+        else:
+            hornets = 0
+
+        # Bee activity based on scenario
+        if scenario == "healthy":
+            bees_in = random.randint(80, 150)
+            bees_out = random.randint(70, 140)
+            bee_status = "normal"
+        elif scenario == "active":
+            bees_in = random.randint(150, 250)
+            bees_out = random.randint(140, 230)
+            bee_status = random.choice(["normal", "active"])
+        else:  # stressed
+            bees_in = random.randint(40, 100)
+            bees_out = random.randint(50, 120)
+            bee_status = random.choice(["normal", "agitated", "stressed"])
+
+        # Acoustic status
+        if hornets > 2:
+            acoustic = "alert"
+        elif hornets > 0:
+            acoustic = "loud"
+        else:
+            acoustic = "normal"
 
     return {
         "ruche_id": ruche["id"],
@@ -87,6 +99,7 @@ def generate_sensor_data(ruche):
         "nombre_abeilles_sorties": bees_out,
         "temperature": temperature,
         "humidite": humidity,
+        "luminosite": luminosite,
         "etat_abeilles": bee_status,
         "etat_acoustique": acoustic
     }
