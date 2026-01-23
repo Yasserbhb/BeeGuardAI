@@ -78,15 +78,38 @@ export default function Dashboard() {
   const loadHistoricalData = async (rucheId, hours, start = null, end = null) => {
     try {
       const history = await ruchesApi.getData(rucheId, hours, start, end);
-      const formatted = history.map((d) => ({
-        ...d,
-        time: new Date(d.timestamp).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
-        date: new Date(d.timestamp).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }),
-        fullTime: hours > 24 || start
-          ? new Date(d.timestamp).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
-          : new Date(d.timestamp).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
-        isNight: d.luminosite === 0
-      }));
+      const formatted = [];
+
+      history.forEach((d, i) => {
+        const isNight = d.luminosite === 0;
+        const timestamp = new Date(d.timestamp);
+
+        const point = {
+          ...d,
+          time: timestamp.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+          date: timestamp.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }),
+          fullTime: hours > 24 || start
+            ? timestamp.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+            : timestamp.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+          isNight
+        };
+
+        formatted.push(point);
+
+        // After a night point, insert a gap (null values) to break the line
+        if (isNight && i < history.length - 1 && history[i + 1].luminosite === 1) {
+          formatted.push({
+            fullTime: point.fullTime + ' ',  // Unique key with space
+            temperature: null,
+            humidite: null,
+            nombre_frelons: null,
+            nombre_abeilles_entrees: null,
+            nombre_abeilles_sorties: null,
+            isGap: true
+          });
+        }
+      });
+
       setHistoricalData(formatted);
     } catch (err) {
       console.error('Failed to load historical data:', err);
@@ -147,20 +170,26 @@ export default function Dashboard() {
   }, {});
 
   // Calculate night periods for charts
+  // Night = luminosite=0 sent once, then device sleeps until morning
   const getNightPeriods = () => {
     if (!historicalData.length) return [];
     const periods = [];
     let nightStart = null;
-    historicalData.forEach((d, i) => {
+    historicalData.forEach((d) => {
+      // Skip gap points
+      if (d.isGap) return;
+
       if (d.isNight && !nightStart) {
         nightStart = d.fullTime;
       } else if (!d.isNight && nightStart) {
-        periods.push({ start: nightStart, end: historicalData[i - 1]?.fullTime });
+        // Night ends at current point (first daytime point after night)
+        periods.push({ start: nightStart, end: d.fullTime });
         nightStart = null;
       }
     });
     if (nightStart) {
-      periods.push({ start: nightStart, end: historicalData[historicalData.length - 1]?.fullTime });
+      const lastRealPoint = historicalData.filter(d => !d.isGap).pop();
+      periods.push({ start: nightStart, end: lastRealPoint?.fullTime });
     }
     return periods;
   };
@@ -301,15 +330,16 @@ export default function Dashboard() {
                       <defs>
                         <linearGradient id="tempGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3} /><stop offset="95%" stopColor="#f59e0b" stopOpacity={0} /></linearGradient>
                         <linearGradient id="humGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} /><stop offset="95%" stopColor="#3b82f6" stopOpacity={0} /></linearGradient>
+                        <linearGradient id="nightGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#1e3a8a" stopOpacity={0.15} /><stop offset="100%" stopColor="#3b82f6" stopOpacity={0.08} /></linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                      {nightPeriods.map((p, i) => <ReferenceArea key={i} x1={p.start} x2={p.end} fill="#1e293b" fillOpacity={0.08} />)}
+                      {nightPeriods.map((p, i) => <ReferenceArea key={i} x1={p.start} x2={p.end} fill="url(#nightGradient)" />)}
                       <XAxis dataKey="fullTime" stroke="#9ca3af" fontSize={11} tickLine={false} interval="preserveStartEnd" />
                       <YAxis stroke="#9ca3af" fontSize={12} tickLine={false} />
                       <Tooltip contentStyle={{ background: 'white', border: 'none', borderRadius: '12px', boxShadow: '0 10px 40px rgba(0,0,0,0.15)' }} />
                       <Legend />
-                      <Area type="monotone" dataKey="temperature" stroke="#f59e0b" strokeWidth={2} fill="url(#tempGradient)" name="Température (°C)" />
-                      <Area type="monotone" dataKey="humidite" stroke="#3b82f6" strokeWidth={2} fill="url(#humGradient)" name="Humidité (%)" />
+                      <Area type="monotone" dataKey="temperature" stroke="#f59e0b" strokeWidth={2} fill="url(#tempGradient)" name="Température (°C)" connectNulls={false} dot={{ r: 3, fill: '#f59e0b' }} />
+                      <Area type="monotone" dataKey="humidite" stroke="#3b82f6" strokeWidth={2} fill="url(#humGradient)" name="Humidité (%)" connectNulls={false} dot={{ r: 3, fill: '#3b82f6' }} />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
@@ -322,13 +352,16 @@ export default function Dashboard() {
                 <div className={styles.chartContainer}>
                   <ResponsiveContainer width="100%" height={300}>
                     <AreaChart data={historicalData}>
-                      <defs><linearGradient id="hornetsGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#ef4444" stopOpacity={0.4} /><stop offset="95%" stopColor="#ef4444" stopOpacity={0} /></linearGradient></defs>
+                      <defs>
+                        <linearGradient id="hornetsGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#ef4444" stopOpacity={0.4} /><stop offset="95%" stopColor="#ef4444" stopOpacity={0} /></linearGradient>
+                        <linearGradient id="nightGradient2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#1e3a8a" stopOpacity={0.15} /><stop offset="100%" stopColor="#3b82f6" stopOpacity={0.08} /></linearGradient>
+                      </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                      {nightPeriods.map((p, i) => <ReferenceArea key={i} x1={p.start} x2={p.end} fill="#1e293b" fillOpacity={0.08} />)}
+                      {nightPeriods.map((p, i) => <ReferenceArea key={i} x1={p.start} x2={p.end} fill="url(#nightGradient2)" />)}
                       <XAxis dataKey="fullTime" stroke="#9ca3af" fontSize={11} tickLine={false} interval="preserveStartEnd" />
                       <YAxis stroke="#9ca3af" fontSize={12} tickLine={false} />
                       <Tooltip contentStyle={{ background: 'white', border: 'none', borderRadius: '12px', boxShadow: '0 10px 40px rgba(0,0,0,0.15)' }} />
-                      <Area type="monotone" dataKey="nombre_frelons" stroke="#ef4444" strokeWidth={2} fill="url(#hornetsGradient)" name="Frelons détectés" />
+                      <Area type="monotone" dataKey="nombre_frelons" stroke="#ef4444" strokeWidth={2} fill="url(#hornetsGradient)" name="Frelons détectés" connectNulls={false} dot={{ r: 3, fill: '#ef4444' }} />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
@@ -341,14 +374,17 @@ export default function Dashboard() {
                 <div className={styles.chartContainer}>
                   <ResponsiveContainer width="100%" height={300}>
                     <LineChart data={historicalData}>
+                      <defs>
+                        <linearGradient id="nightGradient3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#1e3a8a" stopOpacity={0.15} /><stop offset="100%" stopColor="#3b82f6" stopOpacity={0.08} /></linearGradient>
+                      </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                      {nightPeriods.map((p, i) => <ReferenceArea key={i} x1={p.start} x2={p.end} fill="#1e293b" fillOpacity={0.08} />)}
+                      {nightPeriods.map((p, i) => <ReferenceArea key={i} x1={p.start} x2={p.end} fill="url(#nightGradient3)" />)}
                       <XAxis dataKey="fullTime" stroke="#9ca3af" fontSize={11} tickLine={false} interval="preserveStartEnd" />
                       <YAxis stroke="#9ca3af" fontSize={12} tickLine={false} />
                       <Tooltip contentStyle={{ background: 'white', border: 'none', borderRadius: '12px', boxShadow: '0 10px 40px rgba(0,0,0,0.15)' }} />
                       <Legend />
-                      <Line type="monotone" dataKey="nombre_abeilles_entrees" stroke="#22c55e" strokeWidth={2} dot={false} name="Entrées" />
-                      <Line type="monotone" dataKey="nombre_abeilles_sorties" stroke="#f59e0b" strokeWidth={2} dot={false} name="Sorties" />
+                      <Line type="monotone" dataKey="nombre_abeilles_entrees" stroke="#22c55e" strokeWidth={2} dot={{ r: 3, fill: '#22c55e' }} connectNulls={false} name="Entrées" />
+                      <Line type="monotone" dataKey="nombre_abeilles_sorties" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3, fill: '#f59e0b' }} connectNulls={false} name="Sorties" />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>

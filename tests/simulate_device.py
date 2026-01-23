@@ -1,7 +1,7 @@
 """
 BeeGuardAI - Device Simulator
 
-Simulates multiple beehives sending sensor data.
+Simulates beehives sending sensor data with day/night cycle.
 Run: python simulate_device.py
 """
 
@@ -13,154 +13,107 @@ from datetime import datetime
 # Configuration
 API_URL = "http://localhost:8000/api/iot/data"
 INTERVAL = 5  # seconds between each data point
-DURATION = 600  # 10 minutes total
 
-# All ruches from database
-RUCHES = [
-    # Organisation 1 (Sorbonne - admin@sorbonne.fr)
-    {"id": 1, "name": "Ruche Alpha", "scenario": "healthy"},
-    {"id": 2, "name": "Ruche Beta", "scenario": "active"},
-    {"id": 3, "name": "Ruche Gamma", "scenario": "stressed"},
-    {"id": 7, "name": "Ruche 333", "scenario": "healthy"},
-    # Organisation 2 (arezki@gmail.com)
-    {"id": 4, "name": "ruche alpha", "scenario": "active"},
-    # Organisation 3 (amine.naitsiahmed@gmail.com)
-    {"id": 5, "name": "ruche de amine", "scenario": "healthy"},
-    {"id": 6, "name": "RUCHE BETA", "scenario": "stressed"},
-    # Organisation 4 (Test)
-    {"id": 8, "name": "Test", "scenario": "healthy"},
-]
+# Test ruche (change to your ruche id)
+TEST_RUCHE = {"id": 1, "name": "Ruche Alpha"}
 
-# Scenario configs
-SCENARIOS = {
-    "healthy": {"temp_range": (32, 36), "humidity_range": (55, 65), "hornets_chance": 0.1},
-    "active": {"temp_range": (30, 35), "humidity_range": (50, 70), "hornets_chance": 0.2},
-    "stressed": {"temp_range": (28, 38), "humidity_range": (45, 75), "hornets_chance": 0.4},
-}
+# Day/Night cycle config
+DAY_READINGS = 6      # Send 6 readings during "day" (luminosite=1)
+NIGHT_SLEEP = 30      # Sleep 30 seconds during "night"
+CYCLES = 3            # Number of day/night cycles to simulate
 
 
-def generate_sensor_data(ruche):
-    """Generate realistic sensor data based on ruche scenario"""
-    scenario = ruche["scenario"]
-    config = SCENARIOS[scenario]
-
-    # Luminosity based on time (day=1 between 6h-21h, night=0 otherwise)
-    hour = datetime.now().hour
-    luminosite = 1 if 6 <= hour < 21 else 0
-
-    # Temperature
-    temp_min, temp_max = config["temp_range"]
-    temperature = round(random.uniform(temp_min, temp_max), 1)
-
-    # Humidity
-    hum_min, hum_max = config["humidity_range"]
-    humidity = round(random.uniform(hum_min, hum_max), 1)
-
-    # At night, reduce hornet/bee activity
-    if luminosite == 0:
-        hornets = 0
-        bees_in = random.randint(0, 5)
-        bees_out = random.randint(0, 5)
-        bee_status = "normal"
-        acoustic = "normal"
-    else:
-        # Hornets based on scenario
-        if random.random() < config["hornets_chance"]:
-            hornets = random.randint(1, 5 if scenario == "stressed" else 3)
-        else:
-            hornets = 0
-
-        # Bee activity based on scenario
-        if scenario == "healthy":
-            bees_in = random.randint(80, 150)
-            bees_out = random.randint(70, 140)
-            bee_status = "normal"
-        elif scenario == "active":
-            bees_in = random.randint(150, 250)
-            bees_out = random.randint(140, 230)
-            bee_status = random.choice(["normal", "active"])
-        else:  # stressed
-            bees_in = random.randint(40, 100)
-            bees_out = random.randint(50, 120)
-            bee_status = random.choice(["normal", "agitated", "stressed"])
-
-        # Acoustic status
-        if hornets > 2:
-            acoustic = "alert"
-        elif hornets > 0:
-            acoustic = "loud"
-        else:
-            acoustic = "normal"
-
+def generate_day_data(ruche_id):
+    """Generate daytime sensor data (luminosite=1)"""
     return {
-        "ruche_id": ruche["id"],
-        "nombre_frelons": hornets,
-        "nombre_abeilles_entrees": bees_in,
-        "nombre_abeilles_sorties": bees_out,
-        "temperature": temperature,
-        "humidite": humidity,
-        "luminosite": luminosite,
-        "etat_abeilles": bee_status,
-        "etat_acoustique": acoustic
+        "ruche_id": ruche_id,
+        "nombre_frelons": random.randint(0, 2),
+        "nombre_abeilles_entrees": random.randint(80, 150),
+        "nombre_abeilles_sorties": random.randint(70, 140),
+        "temperature": round(random.uniform(32, 36), 1),
+        "humidite": round(random.uniform(55, 65), 1),
+        "luminosite": 1,
+        "etat_abeilles": "normal",
+        "etat_acoustique": "normal"
     }
 
 
-def send_data(ruche):
-    """Send data for a single ruche"""
-    data = generate_sensor_data(ruche)
+def generate_night_data(ruche_id):
+    """Generate night indicator data (luminosite=0) - sent once before sleep"""
+    return {
+        "ruche_id": ruche_id,
+        "nombre_frelons": 0,
+        "nombre_abeilles_entrees": 0,
+        "nombre_abeilles_sorties": 0,
+        "temperature": round(random.uniform(28, 32), 1),
+        "humidite": round(random.uniform(60, 70), 1),
+        "luminosite": 0,
+        "etat_abeilles": "normal",
+        "etat_acoustique": "normal"
+    }
 
+
+def send_data(data):
+    """Send data to API"""
     try:
         response = requests.post(API_URL, json=data, timeout=5)
-
-        if response.status_code == 200:
-            status = "OK"
-            if data["nombre_frelons"] > 0:
-                status = f"ALERT ({data['nombre_frelons']} hornets!)"
-        else:
-            status = f"ERROR {response.status_code}"
-
-        return data, status
+        return response.status_code == 200
     except requests.exceptions.RequestException as e:
-        return data, f"FAILED: {e}"
+        print(f"  ERROR: {e}")
+        return False
 
 
 def main():
     print("=" * 60)
-    print("  BeeGuardAI - Multi-Ruche Simulator")
+    print("  BeeGuardAI - Day/Night Cycle Simulator")
     print("=" * 60)
-    print(f"\nSimulating {len(RUCHES)} ruches:")
-    for r in RUCHES:
-        print(f"  - {r['name']} ({r['scenario']})")
-    print(f"\nSending data every {INTERVAL}s for {DURATION // 60} minutes")
+    print(f"\nRuche: {TEST_RUCHE['name']} (ID: {TEST_RUCHE['id']})")
+    print(f"Pattern: {DAY_READINGS} day readings -> 1 night indicator -> {NIGHT_SLEEP}s sleep")
+    print(f"Cycles: {CYCLES}")
     print(f"API: {API_URL}")
     print("\nPress Ctrl+C to stop\n")
     print("-" * 60)
 
-    start_time = time.time()
-    cycle = 0
+    for cycle in range(1, CYCLES + 1):
+        print(f"\n{'='*20} CYCLE {cycle}/{CYCLES} {'='*20}")
 
-    while (time.time() - start_time) < DURATION:
-        cycle += 1
+        # DAY PHASE: Send readings with luminosite=1
+        print(f"\n[DAY] Sending {DAY_READINGS} readings (luminosite=1)...")
+        for i in range(DAY_READINGS):
+            timestamp = datetime.now().strftime("%H:%M:%S")
+            data = generate_day_data(TEST_RUCHE["id"])
+
+            if send_data(data):
+                print(f"  {timestamp} | Temp: {data['temperature']}°C | Hum: {data['humidite']}% | "
+                      f"Bees: {data['nombre_abeilles_entrees']}/{data['nombre_abeilles_sorties']} | "
+                      f"Lum: {data['luminosite']} | OK")
+            else:
+                print(f"  {timestamp} | FAILED")
+
+            time.sleep(INTERVAL)
+
+        # NIGHT INDICATOR: Send one reading with luminosite=0
+        print(f"\n[NIGHT] Sending night indicator (luminosite=0)...")
         timestamp = datetime.now().strftime("%H:%M:%S")
-        print(f"\n[Cycle {cycle}] {timestamp}")
+        data = generate_night_data(TEST_RUCHE["id"])
 
-        for ruche in RUCHES:
-            data, status = send_data(ruche)
+        if send_data(data):
+            print(f"  {timestamp} | Temp: {data['temperature']}°C | Hum: {data['humidite']}% | "
+                  f"Bees: 0/0 | Lum: {data['luminosite']} | OK")
+        else:
+            print(f"  {timestamp} | FAILED")
 
-            # Color output based on status
-            name = ruche["name"].ljust(12)
-            temp = f"{data['temperature']}°C".ljust(7)
-            hum = f"{data['humidite']}%".ljust(5)
-            hornets = str(data['nombre_frelons']).ljust(2)
-            bees = f"{data['nombre_abeilles_entrees']}/{data['nombre_abeilles_sorties']}"
+        # SLEEP: Device sleeps, no data sent
+        print(f"\n[SLEEP] Device sleeping for {NIGHT_SLEEP}s (no data)...")
+        for remaining in range(NIGHT_SLEEP, 0, -5):
+            print(f"  ... {remaining}s remaining")
+            time.sleep(5)
 
-            print(f"  {name} | Temp: {temp} | Hum: {hum} | Hornets: {hornets} | Bees: {bees.ljust(8)} | {status}")
+        print(f"\n[WAKE] Device waking up!")
 
-        time.sleep(INTERVAL)
-
-    elapsed = int(time.time() - start_time)
     print(f"\n" + "=" * 60)
-    print(f"Done! Ran for {elapsed}s, sent {cycle * len(RUCHES)} data points.")
+    print(f"Done! Completed {CYCLES} day/night cycles.")
+    print("Check the dashboard charts to see the night shading!")
     print("=" * 60)
 
 
