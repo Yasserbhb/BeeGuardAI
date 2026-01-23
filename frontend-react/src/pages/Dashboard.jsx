@@ -112,6 +112,15 @@ export default function Dashboard() {
   const handleTimeFilterChange = (value) => {
     if (value === 'custom') {
       setShowCustomPicker(true);
+      // Set default: last 24 hours
+      const now = new Date();
+      const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      // Format for datetime-local: YYYY-MM-DDTHH:MM
+      const formatForInput = (d) => {
+        const pad = (n) => n.toString().padStart(2, '0');
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      };
+      setCustomRange({ start: formatForInput(yesterday), end: formatForInput(now) });
     } else {
       setShowCustomPicker(false);
     }
@@ -120,7 +129,10 @@ export default function Dashboard() {
 
   const handleCustomRangeSubmit = () => {
     if (customRange.start && customRange.end && selectedRuche) {
-      loadHistoricalData(selectedRuche, 0, customRange.start, customRange.end);
+      // Convert datetime-local to ISO format for InfluxDB
+      const startISO = new Date(customRange.start).toISOString();
+      const endISO = new Date(customRange.end).toISOString();
+      loadHistoricalData(selectedRuche, 0, startISO, endISO);
     }
   };
 
