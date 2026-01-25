@@ -11,7 +11,8 @@ import {
   X,
   FolderOpen,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  Pencil
 } from 'lucide-react';
 import Card, { CardHeader, CardContent } from '../components/Card';
 import Button from '../components/Button';
@@ -34,6 +35,10 @@ export default function Ruches() {
   // Editing
   const [editingDeviceId, setEditingDeviceId] = useState(null);
   const [editDeviceIdValue, setEditDeviceIdValue] = useState('');
+
+  // Editing Rucher
+  const [editingRucherId, setEditingRucherId] = useState(null);
+  const [editRucherData, setEditRucherData] = useState({ nom: '', localisation: '' });
 
   // Collapsed state for ruchers
   const [collapsedRuchers, setCollapsedRuchers] = useState({});
@@ -98,6 +103,27 @@ export default function Ruches() {
       loadData();
     } catch (err) {
       alert('Erreur lors de la suppression');
+    }
+  };
+
+  const startEditRucher = (rucher) => {
+    setEditingRucherId(rucher.id);
+    setEditRucherData({ nom: rucher.nom, localisation: rucher.localisation || '' });
+  };
+
+  const cancelEditRucher = () => {
+    setEditingRucherId(null);
+    setEditRucherData({ nom: '', localisation: '' });
+  };
+
+  const saveRucher = async () => {
+    try {
+      await ruchersApi.update(editingRucherId, editRucherData);
+      setEditingRucherId(null);
+      setEditRucherData({ nom: '', localisation: '' });
+      loadData();
+    } catch (err) {
+      alert('Erreur: ' + err.message);
     }
   };
 
@@ -369,7 +395,7 @@ export default function Ruches() {
             <Card key={rucher.id} className={styles.rucherCard}>
               <div
                 className={styles.rucherHeader}
-                onClick={() => toggleRucherCollapse(rucher.id)}
+                onClick={() => editingRucherId !== rucher.id && toggleRucherCollapse(rucher.id)}
               >
                 <div className={styles.rucherToggle}>
                   {collapsedRuchers[rucher.id] ? <ChevronRight size={20} /> : <ChevronDown size={20} />}
@@ -377,28 +403,66 @@ export default function Ruches() {
                 <div className={styles.rucherIcon}>
                   <FolderOpen size={24} />
                 </div>
-                <div className={styles.rucherInfo}>
-                  <h3 className={styles.rucherName}>{rucher.nom}</h3>
-                  {rucher.localisation && (
-                    <p className={styles.rucherLocation}>
-                      <MapPin size={14} />
-                      {rucher.localisation}
-                    </p>
-                  )}
-                </div>
-                <span className={styles.rucherCount}>
-                  {rucher.ruches.length} ruche{rucher.ruches.length !== 1 ? 's' : ''}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="small"
-                  icon={Trash2}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeleteRucher(rucher.id, rucher.nom);
-                  }}
-                  className={styles.deleteBtn}
-                />
+                {editingRucherId === rucher.id ? (
+                  <div className={styles.rucherEditForm} onClick={(e) => e.stopPropagation()}>
+                    <input
+                      type="text"
+                      value={editRucherData.nom}
+                      onChange={(e) => setEditRucherData({ ...editRucherData, nom: e.target.value })}
+                      placeholder="Nom du rucher"
+                      className={styles.rucherEditInput}
+                      autoFocus
+                    />
+                    <input
+                      type="text"
+                      value={editRucherData.localisation}
+                      onChange={(e) => setEditRucherData({ ...editRucherData, localisation: e.target.value })}
+                      placeholder="Localisation"
+                      className={styles.rucherEditInput}
+                    />
+                    <button className={styles.rucherEditBtn} onClick={saveRucher}>
+                      <Check size={16} />
+                    </button>
+                    <button className={styles.rucherEditBtn} onClick={cancelEditRucher}>
+                      <X size={16} />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <div className={styles.rucherInfo}>
+                      <h3 className={styles.rucherName}>{rucher.nom}</h3>
+                      {rucher.localisation && (
+                        <p className={styles.rucherLocation}>
+                          <MapPin size={14} />
+                          {rucher.localisation}
+                        </p>
+                      )}
+                    </div>
+                    <span className={styles.rucherCount}>
+                      {rucher.ruches.length} ruche{rucher.ruches.length !== 1 ? 's' : ''}
+                    </span>
+                    <button
+                      className={styles.rucherActionBtn}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        startEditRucher(rucher);
+                      }}
+                      title="Modifier"
+                    >
+                      <Pencil size={16} />
+                    </button>
+                    <button
+                      className={`${styles.rucherActionBtn} ${styles.rucherDeleteBtn}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteRucher(rucher.id, rucher.nom);
+                      }}
+                      title="Supprimer"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </>
+                )}
               </div>
 
               {!collapsedRuchers[rucher.id] && (

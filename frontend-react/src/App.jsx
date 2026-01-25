@@ -5,6 +5,7 @@ import Layout from './components/Layout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Ruches from './pages/Ruches';
+import Settings from './pages/Settings';
 
 // Protected Route Component
 function ProtectedRoute({ children }) {
@@ -84,6 +85,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Ruches />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <Settings />
             </ProtectedRoute>
           }
         />

@@ -9,7 +9,8 @@ import {
   Menu,
   X,
   Sun,
-  Moon
+  Moon,
+  Settings
 } from 'lucide-react';
 import { useState } from 'react';
 import styles from './Layout.module.css';
@@ -28,6 +29,7 @@ export default function Layout({ children }) {
   const navItems = [
     { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/ruches', icon: Box, label: 'Ruches' },
+    { to: '/settings', icon: Settings, label: 'Paramètres' },
   ];
 
   return (

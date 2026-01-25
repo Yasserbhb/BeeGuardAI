@@ -314,20 +314,99 @@
   margin: 0;
 }
 
-.deleteBtn {
+.deleteBtn,
+.editBtn {
   color: var(--bee-400);
-  opacity: 0;
-  transition: all var(--transition-normal);
-}
-
-.rucheCard:hover .deleteBtn,
-.rucherHeader:hover .deleteBtn {
   opacity: 1;
+  transition: all var(--transition-normal);
 }
 
 .deleteBtn:hover {
   color: var(--danger) !important;
   background: rgba(239, 68, 68, 0.1) !important;
+}
+
+.editBtn:hover {
+  color: var(--honey-600) !important;
+  background: rgba(245, 158, 11, 0.1) !important;
+}
+
+/* Rucher Edit Form */
+.rucherEditForm {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.rucherEditInput {
+  padding: 8px 12px;
+  border: 2px solid var(--honey-400);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  outline: none;
+  background: white;
+  color: var(--bee-800);
+}
+
+.rucherEditInput:first-of-type {
+  flex: 1;
+  min-width: 150px;
+}
+
+.rucherEditInput:nth-of-type(2) {
+  flex: 1.5;
+  min-width: 180px;
+}
+
+.rucherEditInput:focus {
+  border-color: var(--honey-500);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+}
+
+.rucherEditBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  background: var(--bee-100);
+  color: var(--bee-600);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.rucherEditBtn:hover {
+  background: var(--honey-500);
+  color: white;
+}
+
+/* Rucher Action Buttons (edit/delete) */
+.rucherActionBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: none;
+  background: var(--bee-100);
+  color: var(--bee-500);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.rucherActionBtn:hover {
+  background: var(--honey-100);
+  color: var(--honey-600);
+}
+
+.rucherDeleteBtn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger);
 }
 
 /* Device ID Section */

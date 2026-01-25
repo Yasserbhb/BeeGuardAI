@@ -117,4 +117,18 @@ export const data = {
     }),
 };
 
-export default { auth, ruchers, ruches, data };
+// ============================================
+// SETTINGS
+// ============================================
+
+export const settings = {
+  get: () => apiCall('/settings'),
+
+  update: (data) =>
+    apiCall('/settings', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+};
+
+export default { auth, ruchers, ruches, data, settings };

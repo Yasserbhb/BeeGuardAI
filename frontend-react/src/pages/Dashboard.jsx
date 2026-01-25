@@ -11,8 +11,6 @@ import {
   Calendar
 } from 'lucide-react';
 import {
-  LineChart,
-  Line,
   AreaChart,
   Area,
   XAxis,
@@ -50,9 +48,15 @@ export default function Dashboard() {
 
   useEffect(() => {
     loadData();
-    const interval = setInterval(loadData, 30000);
+    const interval = setInterval(() => {
+      loadData();
+      // Also refresh charts if viewing a specific ruche
+      if (selectedRuche && timeFilter !== 'custom') {
+        loadHistoricalData(selectedRuche, timeFilter);
+      }
+    }, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [selectedRuche, timeFilter]);
 
   useEffect(() => {
     if (selectedRuche && timeFilter !== 'custom') {
@@ -84,6 +88,7 @@ export default function Dashboard() {
         const isNight = d.luminosite === 0;
         const timestamp = new Date(d.timestamp);
 
+        const beeCount = d.nombre_abeilles || 0;
         const point = {
           ...d,
           time: timestamp.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
@@ -91,7 +96,9 @@ export default function Dashboard() {
           fullTime: hours > 24 || start
             ? timestamp.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
             : timestamp.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
-          isNight
+          isNight,
+          abeilles_min: Math.max(0, Math.round(beeCount * 0.85)),
+          abeilles_max: Math.round(beeCount * 1.15)
         };
 
         formatted.push(point);
@@ -103,8 +110,9 @@ export default function Dashboard() {
             temperature: null,
             humidite: null,
             nombre_frelons: null,
-            nombre_abeilles_entrees: null,
-            nombre_abeilles_sorties: null,
+            nombre_abeilles: null,
+            abeilles_min: null,
+            abeilles_max: null,
             isGap: true
           });
         }
@@ -199,13 +207,12 @@ export default function Dashboard() {
   const totals = latestData.reduce(
     (acc, d) => ({
       frelons: acc.frelons + (d.nombre_frelons || 0),
-      entrees: acc.entrees + (d.nombre_abeilles_entrees || 0),
-      sorties: acc.sorties + (d.nombre_abeilles_sorties || 0),
+      abeilles: acc.abeilles + (d.nombre_abeilles || 0),
       avgTemp: acc.avgTemp + (d.temperature || 0),
       avgHum: acc.avgHum + (d.humidite || 0),
       count: acc.count + 1
     }),
-    { frelons: 0, entrees: 0, sorties: 0, avgTemp: 0, avgHum: 0, count: 0 }
+    { frelons: 0, abeilles: 0, avgTemp: 0, avgHum: 0, count: 0 }
   );
 
   const avgTemp = totals.count > 0 ? (totals.avgTemp / totals.count).toFixed(1) : 0;
@@ -254,7 +261,7 @@ export default function Dashboard() {
             <StatCard title="Frelons détectés" value={totals.frelons} icon={Bug} color={totals.frelons > 5 ? 'red' : totals.frelons > 0 ? 'honey' : 'green'} subtitle="Total - Dernière heure" />
             <StatCard title="Température moyenne" value={avgTemp} unit="°C" icon={Thermometer} color="honey" />
             <StatCard title="Humidité moyenne" value={avgHum} unit="%" icon={Droplets} color="blue" />
-            <StatCard title="Activité des abeilles" value={totals.entrees + totals.sorties} icon={Activity} color="green" subtitle={`${totals.entrees} entrées / ${totals.sorties} sorties`} />
+            <StatCard title="Abeilles à l'entrée" value={totals.abeilles} icon={Activity} color="green" subtitle="Total détecté" />
           </div>
 
           {Object.values(ruchesByRucher).map((rucher) => (
@@ -275,7 +282,7 @@ export default function Dashboard() {
                           <div className={styles.rucheOverviewStat}><Thermometer size={18} className={styles.iconTemp} /><span className={styles.statValue}>{rucheData?.temperature?.toFixed(1) || '--'}°C</span></div>
                           <div className={styles.rucheOverviewStat}><Droplets size={18} className={styles.iconHum} /><span className={styles.statValue}>{rucheData?.humidite?.toFixed(0) || '--'}%</span></div>
                           <div className={styles.rucheOverviewStat}><Bug size={18} className={hasAlert ? styles.iconAlert : styles.iconOk} /><span className={styles.statValue}>{rucheData?.nombre_frelons || 0}</span></div>
-                          <div className={styles.rucheOverviewStat}><Activity size={18} className={styles.iconActivity} /><span className={styles.statValue}>{(rucheData?.nombre_abeilles_entrees || 0) + (rucheData?.nombre_abeilles_sorties || 0)}</span></div>
+                          <div className={styles.rucheOverviewStat}><Activity size={18} className={styles.iconActivity} /><span className={styles.statValue}>{rucheData?.nombre_abeilles || 0}</span></div>
                         </div>
                         <div className={styles.rucheOverviewFooter}><span>Voir détails</span><ChevronRight size={16} /></div>
                       </div>
@@ -294,7 +301,7 @@ export default function Dashboard() {
             <StatCard title="Frelons détectés" value={selectedRucheData?.nombre_frelons || 0} icon={Bug} color={selectedRucheData?.nombre_frelons > 0 ? 'red' : 'green'} />
             <StatCard title="Température" value={selectedRucheData?.temperature?.toFixed(1) || 0} unit="°C" icon={Thermometer} color="honey" />
             <StatCard title="Humidité" value={selectedRucheData?.humidite?.toFixed(0) || 0} unit="%" icon={Droplets} color="blue" />
-            <StatCard title="Activité" value={(selectedRucheData?.nombre_abeilles_entrees || 0) + (selectedRucheData?.nombre_abeilles_sorties || 0)} icon={Activity} color="green" subtitle={`${selectedRucheData?.nombre_abeilles_entrees || 0} entrées / ${selectedRucheData?.nombre_abeilles_sorties || 0} sorties`} />
+            <StatCard title="Abeilles à l'entrée" value={selectedRucheData?.nombre_abeilles || 0} icon={Activity} color="green" subtitle="Total détecté" />
           </div>
 
           <div className={styles.timeFilterBar}>
@@ -338,8 +345,8 @@ export default function Dashboard() {
                       <YAxis stroke="#9ca3af" fontSize={12} tickLine={false} />
                       <Tooltip contentStyle={{ background: 'white', border: 'none', borderRadius: '12px', boxShadow: '0 10px 40px rgba(0,0,0,0.15)' }} />
                       <Legend />
-                      <Area type="monotone" dataKey="temperature" stroke="#f59e0b" strokeWidth={2} fill="url(#tempGradient)" name="Température (°C)" connectNulls={false} dot={{ r: 3, fill: '#f59e0b' }} />
-                      <Area type="monotone" dataKey="humidite" stroke="#3b82f6" strokeWidth={2} fill="url(#humGradient)" name="Humidité (%)" connectNulls={false} dot={{ r: 3, fill: '#3b82f6' }} />
+                      <Area type="monotone" dataKey="temperature" stroke="#f59e0b" strokeWidth={2} fill="url(#tempGradient)" name="Température (°C)" connectNulls={false} dot={false} />
+                      <Area type="monotone" dataKey="humidite" stroke="#3b82f6" strokeWidth={2} fill="url(#humGradient)" name="Humidité (%)" connectNulls={false} dot={false} />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
@@ -361,7 +368,7 @@ export default function Dashboard() {
                       <XAxis dataKey="fullTime" stroke="#9ca3af" fontSize={11} tickLine={false} interval="preserveStartEnd" />
                       <YAxis stroke="#9ca3af" fontSize={12} tickLine={false} />
                       <Tooltip contentStyle={{ background: 'white', border: 'none', borderRadius: '12px', boxShadow: '0 10px 40px rgba(0,0,0,0.15)' }} />
-                      <Area type="monotone" dataKey="nombre_frelons" stroke="#ef4444" strokeWidth={2} fill="url(#hornetsGradient)" name="Frelons détectés" connectNulls={false} dot={{ r: 3, fill: '#ef4444' }} />
+                      <Area type="monotone" dataKey="nombre_frelons" stroke="#ef4444" strokeWidth={2} fill="url(#hornetsGradient)" name="Frelons détectés" connectNulls={false} dot={false} />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
@@ -369,23 +376,30 @@ export default function Dashboard() {
             </Card>
 
             <Card className={`${styles.chartCard} ${styles.fullWidth}`}>
-              <CardHeader title="Activité des abeilles" subtitle={`Entrées et sorties - ${currentTimeFilter?.label || 'Personnalisé'}`} />
+              <CardHeader title="Abeilles à l'entrée" subtitle={`Comptage estimé (±15%) - ${currentTimeFilter?.label || 'Personnalisé'}`} />
               <CardContent>
                 <div className={styles.chartContainer}>
                   <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={historicalData}>
+                    <AreaChart data={historicalData}>
                       <defs>
                         <linearGradient id="nightGradient3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#1e3a8a" stopOpacity={0.15} /><stop offset="100%" stopColor="#3b82f6" stopOpacity={0.08} /></linearGradient>
+                        <linearGradient id="beesGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#22c55e" stopOpacity={0.5} /><stop offset="100%" stopColor="#22c55e" stopOpacity={0.05} /></linearGradient>
+                        <linearGradient id="uncertaintyGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#22c55e" stopOpacity={0.25} /><stop offset="100%" stopColor="#22c55e" stopOpacity={0.05} /></linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                       {nightPeriods.map((p, i) => <ReferenceArea key={i} x1={p.start} x2={p.end} fill="url(#nightGradient3)" />)}
                       <XAxis dataKey="fullTime" stroke="#9ca3af" fontSize={11} tickLine={false} interval="preserveStartEnd" />
                       <YAxis stroke="#9ca3af" fontSize={12} tickLine={false} />
-                      <Tooltip contentStyle={{ background: 'white', border: 'none', borderRadius: '12px', boxShadow: '0 10px 40px rgba(0,0,0,0.15)' }} />
-                      <Legend />
-                      <Line type="monotone" dataKey="nombre_abeilles_entrees" stroke="#22c55e" strokeWidth={2} dot={{ r: 3, fill: '#22c55e' }} connectNulls={false} name="Entrées" />
-                      <Line type="monotone" dataKey="nombre_abeilles_sorties" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3, fill: '#f59e0b' }} connectNulls={false} name="Sorties" />
-                    </LineChart>
+                      <Tooltip contentStyle={{ background: 'white', border: 'none', borderRadius: '12px', boxShadow: '0 10px 40px rgba(0,0,0,0.15)' }} formatter={(value, name) => {
+                        if (name === 'Plage estimée (max)') return [null, null];
+                        if (name === 'Plage estimée (min)') return [null, null];
+                        return [value, name];
+                      }} />
+                      <Legend formatter={(value) => value === 'Plage estimée (max)' || value === 'Plage estimée (min)' ? null : value} />
+                      <Area type="monotone" dataKey="abeilles_max" stroke="none" fill="url(#uncertaintyGradient)" connectNulls={false} name="Plage estimée (max)" legendType="none" />
+                      <Area type="monotone" dataKey="abeilles_min" stroke="none" fill="white" connectNulls={false} name="Plage estimée (min)" legendType="none" />
+                      <Area type="monotone" dataKey="nombre_abeilles" stroke="#22c55e" strokeWidth={2} fill="none" connectNulls={false} name="Abeilles détectées" dot={false} />
+                    </AreaChart>
                   </ResponsiveContainer>
                 </div>
               </CardContent>
