@@ -46,74 +46,76 @@ def send_email(to_email: str, subject: str, html_content: str, attachment: bytes
         return False
 
 
-def send_hornet_alert(to_email: str, ruche_name: str, rucher_name: str, hornet_count: int, bee_count: int, ratio: float):
-    """Send hornet alert email"""
+def send_grouped_hornet_alert(to_email, alerts):
+    """
+    Sends a single email containing all hives that triggered an alert.
+    'alerts' is a list of dicts: [{'name': '...', 'ratio': 15.2, 'h_avg': 5.2, 'b_avg': 34.1}, ...]
+    """
+    subject = f"🚨 BeeGuardAI : {len(alerts)} alerte{'s' if len(alerts) > 1 else ''} frelons détectée{'s' if len(alerts) > 1 else ''}"
 
-    subject = f"🚨 Alerte Frelons - {ruche_name}"
+    # Generate rows for the table
+    rows_html = ""
+    for a in alerts:
+        # Determine status color based on ratio
+        color = "#dc2626" if a['ratio'] > 10 else "#f59e0b"
+        
+        rows_html += f"""
+        <tr style="border-bottom: 1px solid #e5e7eb;">
+            <td style="padding: 12px; font-weight: 600; color: #1f2937;">{a['name']}</td>
+            <td style="padding: 12px; text-align: center; color: #ef4444; font-weight: bold;">{a['h_avg']}</td>
+            <td style="padding: 12px; text-align: center; color: #10b981;">{a['b_avg']}</td>
+            <td style="padding: 12px; text-align: right;">
+                <span style="background: {color}; color: white; padding: 4px 8px; border-radius: 6px; font-size: 13px;">
+                    {a['ratio']}%
+                </span>
+            </td>
+        </tr>
+        """
 
     html_content = f"""
     <!DOCTYPE html>
     <html>
-    <head>
-        <style>
-            body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; margin: 0; padding: 20px; }}
-            .container {{ max-width: 600px; margin: 0 auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }}
-            .header {{ background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; padding: 30px; text-align: center; }}
-            .header h1 {{ margin: 0; font-size: 24px; }}
-            .header p {{ margin: 10px 0 0; opacity: 0.9; }}
-            .content {{ padding: 30px; }}
-            .alert-box {{ background: #fef2f2; border: 2px solid #fecaca; border-radius: 12px; padding: 20px; margin-bottom: 20px; }}
-            .alert-box h2 {{ color: #dc2626; margin: 0 0 10px; font-size: 18px; }}
-            .stats {{ display: flex; gap: 15px; margin: 20px 0; }}
-            .stat {{ flex: 1; background: #f8fafc; border-radius: 10px; padding: 15px; text-align: center; }}
-            .stat-value {{ font-size: 28px; font-weight: 700; color: #1e293b; }}
-            .stat-label {{ font-size: 12px; color: #64748b; margin-top: 5px; }}
-            .ratio {{ background: #ef4444; color: white; padding: 15px 20px; border-radius: 10px; text-align: center; font-size: 18px; font-weight: 600; }}
-            .footer {{ background: #f8fafc; padding: 20px; text-align: center; color: #64748b; font-size: 13px; }}
-            .btn {{ display: inline-block; background: #f59e0b; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-top: 15px; }}
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="header">
-                <h1>🐝 BeeGuardAI</h1>
-                <p>Alerte de surveillance</p>
+    <body style="font-family: 'Segoe UI', sans-serif; background-color: #f9fafb; padding: 20px;">
+        <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden;">
+            <div style="background: #111827; padding: 20px; text-align: center;">
+                <h1 style="color: #f59e0b; margin: 0; font-size: 24px;">BeeGuardAI</h1>
+                <p style="color: #9ca3af; margin: 5px 0 0;">Alerte de surveillance intelligente</p>
             </div>
-            <div class="content">
-                <div class="alert-box">
-                    <h2>⚠️ Présence de frelons détectée!</h2>
-                    <p>Un taux anormal de frelons a été détecté sur votre ruche. Une intervention peut être nécessaire.</p>
+            
+            <div style="padding: 30px;">
+                <h2 style="color: #111827; font-size: 18px; margin-top: 0;">Attention, présence de frelons détectée</h2>
+                <p style="color: #4b5563;">Les ruches suivantes ont dépassé votre seuil d'alerte durant la dernière heure :</p>
+                
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <thead>
+                        <tr style="background: #f3f4f6; text-align: left; font-size: 12px; text-transform: uppercase; color: #6b7280;">
+                            <th style="padding: 12px;">Ruche</th>
+                            <th style="padding: 12px; text-align: center;">Frelons (moy)</th>
+                            <th style="padding: 12px; text-align: center;">Abeilles (moy)</th>
+                            <th style="padding: 12px; text-align: right;">Ratio</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {rows_html}
+                    </tbody>
+                </table>
+                
+                <div style="background: #fffbeb; border-left: 4px solid #f59e0b; padding: 15px; margin-top: 20px;">
+                    <p style="margin: 0; font-size: 13px; color: #92400e;">
+                        <strong>Conseil :</strong> Une intervention physique est recommandée pour vérifier l'état des muselières ou poser des pièges.
+                    </p>
                 </div>
-
-                <p><strong>Ruche:</strong> {ruche_name}</p>
-                <p><strong>Rucher:</strong> {rucher_name}</p>
-
-                <div class="stats">
-                    <div class="stat">
-                        <div class="stat-value" style="color: #ef4444;">{hornet_count}</div>
-                        <div class="stat-label">Frelons détectés</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-value" style="color: #22c55e;">{bee_count}</div>
-                        <div class="stat-label">Abeilles détectées</div>
-                    </div>
+                
+                <div style="text-align: center; margin-top: 30px;">
+                    <a href="http://localhost:80" style="background: #f59e0b; color: white; padding: 12px 25px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Accéder au Tableau de Bord</a>
                 </div>
-
-                <div class="ratio">
-                    Ratio frelons/abeilles: {ratio:.1f}%
-                </div>
-
-                <p style="margin-top: 20px; color: #64748b;">
-                    Cette alerte a été déclenchée car le ratio de frelons par rapport aux abeilles a dépassé votre seuil configuré sur la dernière heure.
-                </p>
             </div>
-            <div class="footer">
-                <p>BeeGuardAI - Surveillance intelligente des ruches</p>
-                <p>Vous recevez cet email car les alertes sont activées dans vos paramètres.</p>
+            
+            <div style="background: #f3f4f6; padding: 20px; text-align: center; font-size: 12px; color: #9ca3af;">
+                Ce rapport a été généré automatiquement car vous avez activé les alertes dans vos paramètres.
             </div>
         </div>
     </body>
     </html>
     """
-
     return send_email(to_email, subject, html_content)
