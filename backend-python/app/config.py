@@ -16,3 +16,11 @@ MYSQL_PORT = int(os.getenv("MYSQL_PORT", "3306"))
 MYSQL_USER = os.getenv("MYSQL_USER", "beeguard")
 MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD", "secretpassword")
 MYSQL_DATABASE = os.getenv("MYSQL_DATABASE", "beeguardai")
+
+# SMTP Email Configuration
+SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
+SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
+SMTP_USER = os.getenv("SMTP_USER", "")
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
+SMTP_FROM_EMAIL = os.getenv("SMTP_FROM_EMAIL", "noreply@beeguardai.com")
+SMTP_FROM_NAME = os.getenv("SMTP_FROM_NAME", "BeeGuardAI")
