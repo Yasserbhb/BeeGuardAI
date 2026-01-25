@@ -5,9 +5,11 @@ BeeGuardAI - FastAPI Application
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.config import INFLUX_URL, MYSQL_HOST, MYSQL_PORT, MYSQL_DATABASE
+from app.config import INFLUX_URL, MYSQL_HOST, MYSQL_PORT, MYSQL_DATABASE, SMTP_USER
 from app.db import init_database, init_influxdb
-from app.routes import auth_router, ruchers_router, ruches_router, data_router
+from app.routes import auth_router, ruchers_router, ruches_router, data_router, settings_router
+from app.services.alert_service import start_alert_scheduler
+from app.services.report_service import start_report_scheduler
 
 # ============================================
 # APP SETUP
@@ -35,6 +37,7 @@ app.include_router(auth_router)
 app.include_router(ruchers_router)
 app.include_router(ruches_router)
 app.include_router(data_router)
+app.include_router(settings_router)
 
 
 # ============================================
@@ -59,9 +62,17 @@ async def startup():
     init_influxdb()
     init_database()
 
+    # Start background services
+    start_alert_scheduler()
+    start_report_scheduler()
+
     print(f"\n🚀 Server running on http://localhost:8000")
     print(f"📊 InfluxDB: {INFLUX_URL}")
     print(f"🗄️  MySQL: {MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DATABASE}")
+    if SMTP_USER:
+        print(f"📧 SMTP configured: {SMTP_USER}")
+    else:
+        print(f"⚠️  SMTP not configured - emails will be logged only")
     print("\n")
 
 

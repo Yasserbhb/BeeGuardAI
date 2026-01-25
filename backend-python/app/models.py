@@ -44,8 +44,7 @@ class SensorData(BaseModel):
     ruche_id: Optional[int] = None
     device_id: Optional[str] = None  # TTN device ID (e.g., "beehive-7074")
     nombre_frelons: int = 0
-    nombre_abeilles_entrees: int = 0
-    nombre_abeilles_sorties: int = 0
+    nombre_abeilles: int = 0  # Total bees detected at entry
     temperature: float = 0.0
     humidite: float = 0.0
     luminosite: int = 1  # 0=night, 1=day

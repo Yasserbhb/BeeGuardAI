@@ -86,6 +86,23 @@ def init_database():
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
     ''')
 
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS user_settings (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT UNIQUE NOT NULL,
+            alerts_enabled BOOLEAN DEFAULT FALSE,
+            alerts_email VARCHAR(255),
+            alerts_threshold INT DEFAULT 5,
+            reports_enabled BOOLEAN DEFAULT FALSE,
+            reports_email VARCHAR(255),
+            reports_frequency ENUM('daily', 'weekly') DEFAULT 'weekly',
+            reports_day_of_week INT DEFAULT 1,
+            reports_hour_of_day INT DEFAULT 8,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES utilisateurs(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    ''')
+
     # Create default organization and admin
     cursor.execute("SELECT id FROM organisations WHERE nom = 'Sorbonne Université'")
     if not cursor.fetchone():
