@@ -18,6 +18,7 @@ DURATION = 180  # 3 minutes total
 # Ruche to test
 RUCHES = [
     {"device_id": "beehive-27789", "name": "Ruche Test 1P", "has_hornets": True},
+    {"device_id": "beehive-7074", "name": "Ruche 333", "has_hornets": True},
 ]
 
 

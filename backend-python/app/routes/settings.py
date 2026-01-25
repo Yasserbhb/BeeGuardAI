@@ -150,3 +150,45 @@ async def update_settings(data: SettingsUpdate, request: Request):
     conn.close()
 
     return {"success": True, "message": "Settings updated"}
+
+
+@router.post("/api/test/send-report")
+async def test_send_report():
+    """TEST ENDPOINT: Send a report immediately to admin user"""
+    from app.services.report_service import send_report
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # Get admin user settings (check user_settings first for configured email)
+    cursor.execute("""
+        SELECT us.reports_email, u.email as user_email
+        FROM utilisateurs u
+        LEFT JOIN user_settings us ON u.id = us.user_id
+        WHERE u.id = 1
+    """)
+    result = cursor.fetchone()
+    conn.close()
+
+    if not result:
+        raise HTTPException(status_code=404, detail="Admin user not found")
+
+    # Use reports_email from settings if configured, otherwise fall back to account email
+    email = result["reports_email"] or result["user_email"]
+
+    success = send_report(user_id=1, email=email, frequency="daily")
+
+    if success:
+        return {"success": True, "message": f"Report sent to {email}"}
+    else:
+        return {"success": False, "message": "Failed to send report"}
+
+
+@router.post("/api/test/check-alerts")
+async def test_check_alerts():
+    """TEST ENDPOINT: Trigger alert check immediately"""
+    from app.services.alert_service import check_alerts
+
+    check_alerts()
+
+    return {"success": True, "message": "Alert check completed - check backend logs"}
