@@ -40,15 +40,12 @@ export default function Layout({ children }) {
           <div className={styles.logo}>
             <div className={styles.logoIcon}>
               <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M20 4L35 12V28L20 36L5 28V12L20 4Z" fill="currentColor" opacity="0.2"/>
+                <path d="M20 4L35 12V28L20 36L5 28V12L20 4Z" fill="currentColor" opacity="0.3"/>
                 <path d="M20 8L30 14V26L20 32L10 26V14L20 8Z" fill="currentColor"/>
-                <circle cx="20" cy="20" r="4" fill="white"/>
+                <circle cx="20" cy="20" r="4" fill="#111827"/>
               </svg>
             </div>
-            <div>
-              <h1 className={styles.logoText}>BeeGuardAI</h1>
-              <span className={styles.logoSubtext}>Surveillance intelligente</span>
-            </div>
+            <span className={styles.logoText}>BeeGuardAI</span>
           </div>
 
           {/* Desktop Navigation */}
