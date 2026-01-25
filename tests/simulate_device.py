@@ -1,7 +1,7 @@
 """
-BeeGuardAI - Device Simulator
+BeeGuardAI - Device Simulator (ALERT TEST MODE)
 
-Simulates beehives sending sensor data with day/night cycle.
+Simulates beehives with HIGH HORNET counts to trigger alerts.
 Run: python simulate_device.py
 """
 
@@ -13,44 +13,56 @@ from datetime import datetime
 # Configuration
 API_URL = "http://localhost:8000/api/iot/data"
 INTERVAL = 5  # seconds between each data point
+DURATION = 180  # 3 minutes total
 
-# Test ruche (change to your ruche id)
-TEST_RUCHE = {"id": 1, "name": "Ruche Alpha"}
-
-# Day/Night cycle config
-DAY_READINGS = 6      # Send 6 readings during "day" (luminosite=1)
-NIGHT_SLEEP = 30      # Sleep 30 seconds during "night"
-CYCLES = 3            # Number of day/night cycles to simulate
+# Ruche to test
+RUCHES = [
+    {"device_id": "beehive-27789", "name": "Ruche Test 1P", "has_hornets": True},
+]
 
 
-def generate_day_data(ruche_id):
-    """Generate daytime sensor data (luminosite=1)"""
-    return {
-        "ruche_id": ruche_id,
-        "nombre_frelons": random.randint(0, 2),
-        "nombre_abeilles_entrees": random.randint(80, 150),
-        "nombre_abeilles_sorties": random.randint(70, 140),
-        "temperature": round(random.uniform(32, 36), 1),
-        "humidite": round(random.uniform(55, 65), 1),
-        "luminosite": 1,
-        "etat_abeilles": "normal",
-        "etat_acoustique": "normal"
+def generate_winter_data(ruche):
+    """Generate winter sensor data (8-10°C, reduced bee activity)"""
+
+    # Winter temperature (8-10°C)
+    temperature = round(random.uniform(8, 10), 1)
+
+    # Higher humidity in winter
+    humidity = round(random.uniform(70, 85), 1)
+
+    # Daytime for testing
+    luminosite = 1
+
+    # Bees at entry
+    total_bees = random.randint(20, 40)
+
+    # HIGH HORNETS for alert testing
+    if ruche["has_hornets"]:
+        hornets = random.randint(5, 15)  # High numbers to trigger 1% threshold
+        acoustic = "alert"
+        bee_status = "stressed"
+    else:
+        hornets = 0
+        acoustic = "normal"
+        bee_status = "normal"
+
+    data = {
+        "nombre_frelons": hornets,
+        "nombre_abeilles": total_bees,
+        "temperature": temperature,
+        "humidite": humidity,
+        "luminosite": luminosite,
+        "etat_abeilles": bee_status,
+        "etat_acoustique": acoustic
     }
 
+    # Use device_id if available, otherwise ruche_id
+    if "device_id" in ruche:
+        data["device_id"] = ruche["device_id"]
+    else:
+        data["ruche_id"] = ruche["id"]
 
-def generate_night_data(ruche_id):
-    """Generate night indicator data (luminosite=0) - sent once before sleep"""
-    return {
-        "ruche_id": ruche_id,
-        "nombre_frelons": 0,
-        "nombre_abeilles_entrees": 0,
-        "nombre_abeilles_sorties": 0,
-        "temperature": round(random.uniform(28, 32), 1),
-        "humidite": round(random.uniform(60, 70), 1),
-        "luminosite": 0,
-        "etat_abeilles": "normal",
-        "etat_acoustique": "normal"
-    }
+    return data
 
 
 def send_data(data):
@@ -64,57 +76,56 @@ def send_data(data):
 
 
 def main():
-    print("=" * 60)
-    print("  BeeGuardAI - Day/Night Cycle Simulator")
-    print("=" * 60)
-    print(f"\nRuche: {TEST_RUCHE['name']} (ID: {TEST_RUCHE['id']})")
-    print(f"Pattern: {DAY_READINGS} day readings -> 1 night indicator -> {NIGHT_SLEEP}s sleep")
-    print(f"Cycles: {CYCLES}")
+    print("=" * 65)
+    print("  BeeGuardAI - ALERT TEST MODE (High Hornets)")
+    print("=" * 65)
+    print(f"\nSimulating {len(RUCHES)} ruche(s):")
+    for r in RUCHES:
+        status = " [HIGH HORNETS!]" if r["has_hornets"] else ""
+        device = r.get("device_id", f"id:{r.get('id')}")
+        print(f"  - {r['name']} ({device}){status}")
+    print(f"\nSending 5-15 hornets per reading to trigger alerts")
+    print(f"Sending data every {INTERVAL}s for {DURATION // 60} minutes")
     print(f"API: {API_URL}")
     print("\nPress Ctrl+C to stop\n")
-    print("-" * 60)
+    print("-" * 65)
 
-    for cycle in range(1, CYCLES + 1):
-        print(f"\n{'='*20} CYCLE {cycle}/{CYCLES} {'='*20}")
+    start_time = time.time()
+    cycle = 0
 
-        # DAY PHASE: Send readings with luminosite=1
-        print(f"\n[DAY] Sending {DAY_READINGS} readings (luminosite=1)...")
-        for i in range(DAY_READINGS):
-            timestamp = datetime.now().strftime("%H:%M:%S")
-            data = generate_day_data(TEST_RUCHE["id"])
+    while (time.time() - start_time) < DURATION:
+        cycle += 1
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        print(f"\n[Cycle {cycle}] {timestamp}")
+
+        for ruche in RUCHES:
+            data = generate_winter_data(ruche)
 
             if send_data(data):
-                print(f"  {timestamp} | Temp: {data['temperature']}°C | Hum: {data['humidite']}% | "
-                      f"Bees: {data['nombre_abeilles_entrees']}/{data['nombre_abeilles_sorties']} | "
-                      f"Lum: {data['luminosite']} | OK")
+                # Format output
+                name = ruche["name"].ljust(12)
+                temp = f"{data['temperature']}°C".ljust(7)
+                hum = f"{data['humidite']}%".ljust(6)
+                hornets = str(data['nombre_frelons']).ljust(2)
+                bees = str(data['nombre_abeilles']).ljust(4)
+
+                # Highlight hornets
+                status = "OK"
+                if data['nombre_frelons'] > 0:
+                    status = f"⚠️  HORNETS ({data['nombre_frelons']})"
+
+                print(f"  {name} | {temp} | {hum} | Hornets: {hornets} | Bees: {bees} | {status}")
             else:
-                print(f"  {timestamp} | FAILED")
+                print(f"  {ruche['name'].ljust(12)} | FAILED")
 
-            time.sleep(INTERVAL)
+        time.sleep(INTERVAL)
 
-        # NIGHT INDICATOR: Send one reading with luminosite=0
-        print(f"\n[NIGHT] Sending night indicator (luminosite=0)...")
-        timestamp = datetime.now().strftime("%H:%M:%S")
-        data = generate_night_data(TEST_RUCHE["id"])
-
-        if send_data(data):
-            print(f"  {timestamp} | Temp: {data['temperature']}°C | Hum: {data['humidite']}% | "
-                  f"Bees: 0/0 | Lum: {data['luminosite']} | OK")
-        else:
-            print(f"  {timestamp} | FAILED")
-
-        # SLEEP: Device sleeps, no data sent
-        print(f"\n[SLEEP] Device sleeping for {NIGHT_SLEEP}s (no data)...")
-        for remaining in range(NIGHT_SLEEP, 0, -5):
-            print(f"  ... {remaining}s remaining")
-            time.sleep(5)
-
-        print(f"\n[WAKE] Device waking up!")
-
-    print(f"\n" + "=" * 60)
-    print(f"Done! Completed {CYCLES} day/night cycles.")
-    print("Check the dashboard charts to see the night shading!")
-    print("=" * 60)
+    elapsed = int(time.time() - start_time)
+    total_points = cycle * len(RUCHES)
+    print(f"\n" + "=" * 65)
+    print(f"Done! Ran for {elapsed}s, sent {total_points} data points.")
+    print(f"Check the dashboard to see winter data + hornet alerts!")
+    print("=" * 65)
 
 
 if __name__ == "__main__":
