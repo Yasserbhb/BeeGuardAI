@@ -164,7 +164,7 @@ The ESP32 device runs on-device AI inference using Edge Impulse.
 
 ### Components
 - **Microcontroller**: Seeed XIAO ESP32S3 
-- **Sensors**: Temperature, humidity, camera, microphone
+- **Sensors**: Temperature, humidity,Luminosity, camera, microphone
 - **Communication**: LoRaWAN module
 
 ### Firmware Structure
