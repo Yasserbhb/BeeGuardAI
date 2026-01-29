@@ -1,36 +1,67 @@
-# BeeGuardAI
+<p align="center">
+  <img src="frontend-react/public/favicon.svg" alt="BeeGuardAI Logo" width="120" />
+</p>
 
-Smart beehive monitoring system with AI-powered hornet detection.
+<h1 align="center">BeeGuardAI</h1>
+
+<p align="center">
+  <strong>Smart beehive monitoring system with AI-powered Asian hornet detection</strong>
+</p>
+
+<p align="center">
+  Real-time monitoring of beehives wellbeing, temperature, humidity, and automatic detection of Asian hornets  to protect bee colonies.
+</p>
+
+---
+
+## Team
+
+| Name | Role |
+|------|------|
+| Yasser BOUHAI | Project Lead |
+| Ghozlene HANAFI | Developer |
+| Yanelle BEKKAR | Developer |
+| Hadriel RATIARISON | Developer |
+| Amine NAIT SI-AHMED | Developer |
+
+*Sorbonne Université - 2025/2026*
+
+---
 
 ## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                         Frontend                             │
-│                    React + Vite + Nginx                      │
-│                        (Port 80)                             │
+│                       ESP32 Device                          │
+│              Edge Impulse AI Model (on-device)              │
+│         Temperature, Humidity, Camera, Microphone           │
 └─────────────────────────┬───────────────────────────────────┘
-                          │ /api/*
+                          │ LoRaWAN
                           ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                         Backend                              │
-│                   FastAPI + Python                           │
-│                       (Port 8000)                            │
-└──────────┬─────────────────────────────────┬────────────────┘
-           │                                 │
-           ▼                                 ▼
-┌─────────────────────┐         ┌─────────────────────────────┐
-│       MySQL         │         │         InfluxDB            │
-│   (Relational DB)   │         │     (Time-series DB)        │
-│     Port 3306       │         │        Port 8086            │
-│                     │         │                             │
-│ - Users             │         │ - Sensor data               │
-│ - Organizations     │         │ - Temperature               │
-│ - Beehives (ruches) │         │ - Humidity                  │
-│ - Apiaries (ruchers)│         │ - Bee counts                │
-│ - User settings     │         │ - Hornet detections         │
-│ - Sessions          │         │                             │
-└─────────────────────┘         └─────────────────────────────┘
+│                  The Things Network (TTN)                   │
+│                    Payload Formatter                        │
+└─────────────────────────┬───────────────────────────────────┘
+                          │ Webhook (POST /api/iot/data)
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│                         Backend                             │
+│                   FastAPI + Python                          │
+│                       (Port 8000)                           │
+└──────────┬──────────────┼──────────────────┬────────────────┘
+           │              │                  │
+           ▼              ▼                  ▼
+┌──────────────────┐ ┌──────────────┐ ┌─────────────────────┐
+│      MySQL       │ │   InfluxDB   │ │      Frontend       │
+│  (Relational DB) │ │ (Time-series)│ │  React + Nginx      │
+│    Port 3306     │ │  Port 8086   │ │     Port 80         │
+│                  │ │              │ │                     │
+│ - Users          │ │ - Sensor data│ │ - Dashboard         │
+│ - Organizations  │ │ - Temperature│ │ - Charts            │
+│ - Beehives       │ │ - Humidity   │ │ - Settings          │
+│ - Apiaries       │ │ - Bee counts │ │ - Alerts history    │
+│ - Settings       │ │ - Hornets    │ │                     │
+└──────────────────┘ └──────────────┘ └─────────────────────┘
 ```
 
 ## Tech Stack
@@ -43,13 +74,15 @@ Smart beehive monitoring system with AI-powered hornet detection.
 | Time-series DB | InfluxDB 2.7 |
 | Containerization | Docker, Docker Compose |
 | Reverse Proxy | Nginx |
-| PDF Reports | ReportLab |
+| Hardware | ESP32 (Seeed XIAO) |
+| AI Inference | Edge Impulse |
+| Communication | LoRaWAN via TTN |
 | Email | SMTP (Gmail compatible) |
 
 ## Quick Start
 
 ### Prerequisites
-- Docker & Docker Compose installed
+- **Docker Desktop** installed and running
 - Git
 
 ### Run locally
@@ -59,8 +92,10 @@ Smart beehive monitoring system with AI-powered hornet detection.
 git clone https://github.com/your-username/BeeGuardAI.git
 cd BeeGuardAI
 
-# Copy environment file
+# Create environment file from template
 cp .env.example .env
+
+# Edit .env with your own credentials (SMTP, database passwords, etc.)
 
 # Start all services
 docker-compose up -d
@@ -110,6 +145,10 @@ BeeGuardAI/
 │   ├── Dockerfile
 │   └── package.json
 │
+├── esp32/                   # ESP32 firmware
+│   ├── arduino.ino          # Main Arduino code
+│   └── beeguardai_inferencing/  # Edge Impulse model library
+│
 ├── tests/
 │   ├── simulate_device.py   # Device simulator
 │   └── test_report.py       # Email test script
@@ -117,6 +156,41 @@ BeeGuardAI/
 ├── docker-compose.yml       # Docker services
 ├── .env.example             # Environment template
 └── README.md
+```
+
+## ESP32 Hardware
+
+The ESP32 device runs on-device AI inference using Edge Impulse.
+
+### Components
+- **Microcontroller**: Seeed XIAO ESP32S3 (or similar)
+- **Sensors**: Temperature, humidity, camera, microphone
+- **Communication**: LoRaWAN module
+
+### Firmware Structure
+- `arduino.ino` - Main code that reads sensors, runs inference, and sends data via LoRaWAN
+- `beeguardai_inferencing/` - Edge Impulse exported library containing the trained AI model
+
+### Data Flow
+1. ESP32 reads sensors and runs AI inference locally
+2. Results sent via LoRaWAN to The Things Network (TTN)
+3. TTN payload formatter decodes the raw bytes to JSON
+4. TTN webhook sends POST request directly to backend `/api/iot/data`
+5. Backend stores in InfluxDB and triggers email alerts if hornets detected
+
+### TTN Payload Format
+```javascript
+// Device sends: "DATA T:25.4 H:40.2"
+// Formatter outputs:
+{
+  "device_id": "xiao-beeguard",
+  "temperature": 25.4,
+  "humidite": 40.2,
+  "nombre_frelons": 0,
+  "nombre_abeilles": 0,
+  "luminosite": 1,
+  "etat_acoustique": "bees"
+}
 ```
 
 ## API Endpoints
@@ -154,40 +228,34 @@ BeeGuardAI/
 
 ## Features
 
-### Implemented
-- [x] User authentication (register, login, logout)
-- [x] Multi-organization support
-- [x] Beehive management (CRUD)
-- [x] Apiary management (CRUD)
-- [x] Real-time dashboard with sensor data
-- [x] Historical data charts with date filtering
-- [x] Auto-generated device IDs
-- [x] IoT data ingestion endpoint
-- [x] Device simulator for testing
-- [x] Dark/Light theme toggle
-- [x] Email alerts for hornet detection
-- [x] PDF reports (daily/weekly)
-- [x] User settings page
-
-### To Be Added
-- [ ] AI hornet detection (image classification)
-- [ ] Push notifications
-- [ ] Mobile app
-- [ ] User roles (admin, manager, viewer)
+- User authentication (register, login, logout)
+- Multi-organization support
+- Beehive management (CRUD)
+- Apiary management (CRUD)
+- Real-time dashboard with sensor data
+- Historical data charts with time range filtering
+- Acoustic state monitoring (bees, no_bees, queen)
+- Auto-generated device IDs
+- IoT data ingestion (direct HTTP + TTN webhook)
+- Device simulator for testing
+- Dark/Light theme toggle
+- Email alerts for hornet detection
+- PDF reports (daily/weekly)
+- User settings page
 
 ## Environment Variables
 
-Copy `.env.example` to `.env` and configure:
+Create `.env` from `.env.example` and configure with your credentials:
 
 ```bash
 # MySQL
-MYSQL_ROOT_PASSWORD=rootpassword
+MYSQL_ROOT_PASSWORD=your-root-password
 MYSQL_DATABASE=beeguardai
 MYSQL_USER=beeguard
-MYSQL_PASSWORD=secretpassword
+MYSQL_PASSWORD=your-password
 
 # InfluxDB
-INFLUX_TOKEN=beeguardai-super-secret-token
+INFLUX_TOKEN=your-influx-token
 INFLUX_ORG=beeguardai
 INFLUX_BUCKET=sensor_data
 
@@ -202,8 +270,7 @@ SMTP_FROM_NAME=BeeGuardAI
 
 ## IoT Integration
 
-Send sensor data to your beehives via HTTP POST:
-
+### Direct HTTP POST
 ```bash
 curl -X POST http://your-server/api/iot/data \
   -H "Content-Type: application/json" \
@@ -213,21 +280,26 @@ curl -X POST http://your-server/api/iot/data \
     "humidite": 65.0,
     "nombre_abeilles": 150,
     "nombre_frelons": 0,
-    "luminosite": 1
+    "luminosite": 1,
+    "etat_acoustique": "bees"
   }'
+```
+
+### Via TTN Webhook
+Configure a webhook in TTN console pointing to:
+```
+https://your-server/api/iot/data
 ```
 
 ## Testing
 
 ### Simulate sensor data
-
 ```bash
 cd tests
 python simulate_device.py
 ```
 
 ### Test email services
-
 ```bash
 cd tests
 python test_report.py report  # Test PDF report
@@ -236,20 +308,19 @@ python test_report.py alert   # Test alert check
 
 ## Deployment
 
-### Production (VPS)
+### Local Development
+1. Install **Docker Desktop**
+2. Clone repo and create `.env` with your credentials
+3. Run `docker-compose up -d`
+4. Access at http://localhost
 
-1. Get a VPS (Hetzner, OVH, DigitalOcean)
+### Production (VPS)
+1. Get a VPS (OVH, Hetzner, DigitalOcean, etc.)
 2. Install Docker & Docker Compose
 3. Clone repo and configure `.env`
 4. Run `docker-compose up -d`
 5. Point your domain to the VPS IP
-
-### With Coolify
-
-1. Install Coolify on your VPS
-2. Connect GitHub repo
-3. Set environment variables
-4. Deploy
+6. (Optional) Set up SSL with Let's Encrypt
 
 ## License
 
