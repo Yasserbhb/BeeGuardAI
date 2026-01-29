@@ -8,7 +8,8 @@ import {
   RefreshCw,
   ChevronRight,
   Clock,
-  Calendar
+  Calendar,
+  Volume2
 } from 'lucide-react';
 import {
   AreaChart,
@@ -34,6 +35,14 @@ const TIME_FILTERS = [
   { label: '30 jours', value: 720 },
   { label: 'Personnalisé', value: 'custom' },
 ];
+
+const ACOUSTIC_STATES = {
+  bees: { label: 'Abeilles', style: 'acousticBees', segment: 'segmentBees', tooltip: 'tooltipBees' },
+  no_bees: { label: 'Silence', style: 'acousticNoBees', segment: 'segmentNoBees', tooltip: 'tooltipNoBees' },
+  queen: { label: 'Reine', style: 'acousticQueen', segment: 'segmentQueen', tooltip: 'tooltipQueen' },
+};
+
+const getAcousticInfo = (state) => ACOUSTIC_STATES[state] || ACOUSTIC_STATES.bees;
 
 export default function Dashboard() {
   const [latestData, setLatestData] = useState([]);
@@ -272,11 +281,18 @@ export default function Dashboard() {
                   {rucher.ruches.map((ruche) => {
                     const rucheData = latestData.find(d => d.ruche_id === ruche.id);
                     const hasAlert = rucheData?.nombre_frelons > 0;
+                    const acousticInfo = getAcousticInfo(rucheData?.etat_acoustique);
                     return (
                       <div key={ruche.id} className={`${styles.rucheOverviewCard} ${hasAlert ? styles.rucheAlert : ''}`} onClick={() => handleSelectRuche(ruche.id)}>
                         <div className={styles.rucheOverviewHeader}>
                           <span className={styles.rucheOverviewName}>{ruche.nom}</span>
-                          <span className={`${styles.rucheOverviewStatus} ${hasAlert ? styles.statusWarning : styles.statusOk}`}>{hasAlert ? 'Alerte' : 'Normal'}</span>
+                          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            <span className={`${styles.acousticBadge} ${styles[acousticInfo.style]}`}>
+                              <Volume2 size={12} />
+                              {acousticInfo.label}
+                            </span>
+                            <span className={`${styles.rucheOverviewStatus} ${hasAlert ? styles.statusWarning : styles.statusOk}`}>{hasAlert ? 'Alerte' : 'Normal'}</span>
+                          </div>
                         </div>
                         <div className={styles.rucheOverviewStats}>
                           <div className={styles.rucheOverviewStat}><Thermometer size={18} className={styles.iconTemp} /><span className={styles.statValue}>{rucheData?.temperature?.toFixed(1) || '--'}°C</span></div>
@@ -380,16 +396,16 @@ export default function Dashboard() {
               <CardContent>
                 <div className={styles.chartContainer}>
                   <ResponsiveContainer width="100%" height={300}>
-                    <AreaChart data={historicalData}>
+                    <AreaChart data={historicalData} margin={{ left: 0, right: 0 }}>
                       <defs>
                         <linearGradient id="nightGradient3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#1e3a8a" stopOpacity={0.15} /><stop offset="100%" stopColor="#3b82f6" stopOpacity={0.08} /></linearGradient>
-                        <linearGradient id="beesGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#22c55e" stopOpacity={0.5} /><stop offset="100%" stopColor="#22c55e" stopOpacity={0.05} /></linearGradient>
-                        <linearGradient id="uncertaintyGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#22c55e" stopOpacity={0.25} /><stop offset="100%" stopColor="#22c55e" stopOpacity={0.05} /></linearGradient>
+                        <linearGradient id="beesGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#22c55e" stopOpacity={0.5} /><stop offset="100%" stopColor="#22c55e" stopOpacity={0.02} /></linearGradient>
+                        <linearGradient id="uncertaintyGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#22c55e" stopOpacity={0.25} /><stop offset="100%" stopColor="#22c55e" stopOpacity={0.02} /></linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                       {nightPeriods.map((p, i) => <ReferenceArea key={i} x1={p.start} x2={p.end} fill="url(#nightGradient3)" />)}
                       <XAxis dataKey="fullTime" stroke="#9ca3af" fontSize={11} tickLine={false} interval="preserveStartEnd" />
-                      <YAxis stroke="#9ca3af" fontSize={12} tickLine={false} />
+                      <YAxis stroke="#9ca3af" fontSize={12} tickLine={false} width={40} />
                       <Tooltip contentStyle={{ background: 'white', border: 'none', borderRadius: '12px', boxShadow: '0 10px 40px rgba(0,0,0,0.15)' }} formatter={(value, name) => {
                         if (name === 'Plage estimée (max)') return [null, null];
                         if (name === 'Plage estimée (min)') return [null, null];
@@ -401,6 +417,40 @@ export default function Dashboard() {
                       <Area type="monotone" dataKey="nombre_abeilles" stroke="#22c55e" strokeWidth={2} fill="none" connectNulls={false} name="Abeilles détectées" dot={false} />
                     </AreaChart>
                   </ResponsiveContainer>
+                </div>
+                {/* Acoustic Timeline */}
+                <div className={styles.acousticSection}>
+                  <div className={styles.acousticHeader}>
+                    <div className={styles.acousticTitle}>
+                      <Volume2 size={14} />
+                      <span>Acoustique</span>
+                    </div>
+                    <div className={styles.acousticLegend}>
+                      <div className={styles.legendItem}>
+                        <div className={`${styles.legendDot} ${styles.legendBees}`} />
+                        <span>Abeilles</span>
+                      </div>
+                      <div className={styles.legendItem}>
+                        <div className={`${styles.legendDot} ${styles.legendNoBees}`} />
+                        <span>Silence</span>
+                      </div>
+                      <div className={styles.legendItem}>
+                        <div className={`${styles.legendDot} ${styles.legendQueen}`} />
+                        <span>Reine</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className={styles.acousticTimeline}>
+                    {historicalData.filter(d => !d.isGap).map((d, i) => {
+                      const info = getAcousticInfo(d.etat_acoustique);
+                      return (
+                        <div
+                          key={i}
+                          className={`${styles.acousticSegment} ${styles[info.segment]}`}
+                        />
+                      );
+                    })}
+                  </div>
                 </div>
               </CardContent>
             </Card>

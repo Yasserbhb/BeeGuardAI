@@ -33,8 +33,7 @@ async def receive_iot_data(request: Request):
             temperature=payload.get("temperature", 0.0),
             humidite=payload.get("humidite", 0.0),
             luminosite=payload.get("luminosite", 1),
-            etat_abeilles=payload.get("etat_abeilles", "normal"),
-            etat_acoustique=payload.get("etat_acoustique", "normal")
+            etat_acoustique=payload.get("etat_acoustique", "bees")
         )
     else:
         # Our direct format
@@ -72,7 +71,6 @@ async def receive_iot_data(request: Request):
         "temperature": data.temperature,
         "humidite": data.humidite,
         "luminosite": data.luminosite,
-        "etat_abeilles": data.etat_abeilles,
         "etat_acoustique": data.etat_acoustique
     }
 
@@ -94,7 +92,6 @@ async def post_donnees(data: SensorData, request: Request):
         "temperature": data.temperature,
         "humidite": data.humidite,
         "luminosite": data.luminosite,
-        "etat_abeilles": data.etat_abeilles,
         "etat_acoustique": data.etat_acoustique
     }
 

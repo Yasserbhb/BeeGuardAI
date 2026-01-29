@@ -48,5 +48,4 @@ class SensorData(BaseModel):
     temperature: float = 0.0
     humidite: float = 0.0
     luminosite: int = 1  # 0=night, 1=day
-    etat_abeilles: str = "normal"
-    etat_acoustique: str = "normal"
+    etat_acoustique: str = "bees"  # bees, no_bees, queen

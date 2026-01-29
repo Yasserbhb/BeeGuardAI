@@ -29,8 +29,7 @@ def write_sensor_data(data: dict):
         .field("temperature", float(data.get("temperature", 0))) \
         .field("humidite", float(data.get("humidite", 0))) \
         .field("luminosite", int(data.get("luminosite", 1))) \
-        .field("etat_abeilles", str(data.get("etat_abeilles", "normal"))) \
-        .field("etat_acoustique", str(data.get("etat_acoustique", "normal")))
+        .field("etat_acoustique", str(data.get("etat_acoustique", "bees")))
 
     write_api.write(bucket=INFLUX_BUCKET, record=point)
     print(f"📊 Data written for Ruche {data.get('ruche_id')}")
@@ -60,8 +59,7 @@ def get_latest_data():
                 "temperature": record.values.get("temperature", 0),
                 "humidite": record.values.get("humidite", 0),
                 "luminosite": record.values.get("luminosite", 1),
-                "etat_abeilles": record.values.get("etat_abeilles", "normal"),
-                "etat_acoustique": record.values.get("etat_acoustique", "normal"),
+                "etat_acoustique": record.values.get("etat_acoustique", "bees"),
                 "timestamp": record.get_time().isoformat()
             })
 
@@ -96,8 +94,7 @@ def get_historical_data(ruche_id: int, hours: int = 168, start_time: str = None,
                 "temperature": record.values.get("temperature", 0),
                 "humidite": record.values.get("humidite", 0),
                 "luminosite": record.values.get("luminosite", 1),
-                "etat_abeilles": record.values.get("etat_abeilles", "normal"),
-                "etat_acoustique": record.values.get("etat_acoustique", "normal")
+                "etat_acoustique": record.values.get("etat_acoustique", "bees")
             })
 
     return data
