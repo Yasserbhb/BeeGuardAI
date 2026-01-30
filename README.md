@@ -193,6 +193,65 @@ The ESP32 device runs on-device AI inference using Edge Impulse.
 }
 ```
 
+## Edge Impulse - Model Training & Optimization
+
+### Dataset
+
+We manually labeled over **1,000 images** to train our object detection model with three classes:
+
+| Class | Description |
+|-------|-------------|
+| `bees` | Group of bees gathered in front of the hive |
+| `bee` | Single bee |
+| `hornet` | Asian hornet roaming around the hive |
+
+### Training Process
+
+We used an iterative training approach on Edge Impulse:
+
+1. **Initial labeling** - Manual bounding box annotation of images
+2. **Incremental training** - After each batch of labeled images, we retrained the model to monitor accuracy evolution
+3. **Final model** - Achieved **85% accuracy** using **YOLO Pro** architecture
+
+```
+Training Evolution:
+┌────────────────┬──────────────┐
+│ Training Round │   Accuracy   │
+├────────────────┼──────────────┤
+│ Round 1        │    ~45%      │
+│ Round 2        │    ~60%      │
+│ Round 3        │    ~72%      │
+│ Final (YOLO)   │    ~85%      │
+└────────────────┴──────────────┘
+```
+
+### Model Optimization for ESP32
+
+The YOLO Pro model could not run on the ESP32 due to severe **RAM limitations**. Even the **YOLO Nano** variant (the smallest YOLO format available) exceeded the memory capacity of the Seeed XIAO ESP32S3. We therefore switched to the **FOMO** architecture and applied several optimization techniques to achieve a good compromise between memory usage and accuracy:
+
+| Optimization Technique | Description |
+|------------------------|-------------|
+| **Image size reduction** | Reduced input resolution to fit memory constraints |
+| **Quantization** | Converted model weights from float32 to int8 |
+| **Grayscale conversion** | Changed from RGB to grayscale images (3x less memory) |
+| **Architecture tuning** | Modified convolution layers and classifier parameters |
+
+### Final Deployed Model
+
+| Parameter | Value |
+|-----------|-------|
+| Architecture | **FOMO** (Faster Objects, More Objects) |
+| Accuracy | **70-75%** |
+| Target device | Seeed XIAO ESP32S3 |
+| Input format | RGB (camera native) |
+
+### Performance Notes
+
+- The optimized FOMO model has some false positives and false negatives
+- Overall detection is reliable enough to **trigger hornet alerts** effectively
+- The trade-off between accuracy and memory footprint was necessary for embedded deployment
+- Real-world testing shows satisfactory hornet detection for alerting purposes
+
 ## API Endpoints
 
 ### Authentication
