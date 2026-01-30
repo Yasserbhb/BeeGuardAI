@@ -5,6 +5,8 @@
 #define DHTPIN 4
 #define DHTTYPE DHT22
 #define SEUIL_NUIT 60  // Lux en dessous = nuit
+#define TEMPS_VEILLE 300  // Temps de veille en secondes avant la prochaine mesure de luminosité
+#define TEMPS_MESURE 2 // Delai entre chaque mesure quand actif
 
 DHT dht(DHTPIN, DHTTYPE);
 
@@ -30,11 +32,13 @@ void loop() {
   Serial.println(" lux");
   
   if (lux < SEUIL_NUIT) {
-    Serial.println("Nuit detectee -> Deep Sleep 1 heure");
-    esp_sleep_enable_timer_wakeup(10 * 1000000ULL);  // 1 heure
+    Serial.println("Nuit detectee -> Deep Sleep");
+    delay(200);
+    esp_sleep_enable_timer_wakeup(TEMPS_VEILLE * 1000000ULL);  
     esp_deep_sleep_start();
   } else {
-    // Jour -> faire les mesures
+    Serial.print("Il fait jour... \n");
+    // // Jour -> faire les mesures
     float h = dht.readHumidity();
     float t = dht.readTemperature();
     
@@ -44,7 +48,7 @@ void loop() {
     Serial.print(h);
     Serial.println(" %");
     
-    delay(2*1000);  // Mesure toutes les minutes
+    delay(TEMPS_MESURE*1000);  
   }
 }
 
